@@ -11,16 +11,16 @@ MODULE MG_ENV_MOD
 
       WRITE(OUTPUT_LOC,*) 'code: miniGhost'
       WRITE(OUTPUT_LOC,*) 'version:1.0.0'
-      WRITE(OUTPUT_LOC,*) 'compiled_on: Wed Nov 13 14:21:18 MST 2013'
-      WRITE(OUTPUT_LOC,*) 'directory: /Users/rfbarre/Desktop/Mantevo_PROJECT/Mantevo/packages/miniGhost/miniGhost_ref'
-      WRITE(OUTPUT_LOC,*) 'FORTRAN_compiler: gfortran'
-      WRITE(OUTPUT_LOC,*) 'C_compiler: cc'
-      WRITE(OUTPUT_LOC,*) 'linker: gfortran'
-      WRITE(OUTPUT_LOC,*) 'FORTRAN_flags: -D_MG_SERIAL -D_MG_REAL8 -D_MG_INT4 -ffree-line-length-none -O3 -ffree-form '
-      WRITE(OUTPUT_LOC,*) 'C_flags: -D_MG_SERIAL -D_MG_REAL8 -D_MG_INT4 -Df2c_'
+      WRITE(OUTPUT_LOC,*) 'compiled_on: Mon Aug  5 16:54:48 CDT 2019'
+      WRITE(OUTPUT_LOC,*) 'directory: /home/kaiming/ucr/research/ANL/miniGhost/ref'
+      WRITE(OUTPUT_LOC,*) 'FORTRAN_compiler: mpif90'
+      WRITE(OUTPUT_LOC,*) 'C_compiler: mpicc'
+      WRITE(OUTPUT_LOC,*) 'linker: mpif90'
+      WRITE(OUTPUT_LOC,*) 'FORTRAN_flags: -D_MG_MPI -D_MG_INT4 -D_MG_REAL8 -O3 -ffree-form -ffree-line-length-none'
+      WRITE(OUTPUT_LOC,*) 'C_flags: -D_MG_MPI -Df2c_'
       WRITE(OUTPUT_LOC,*) 'arch: '
-      WRITE(OUTPUT_LOC,*) 'hostname: s947704.srn.sandia.gov'
-      WRITE(OUTPUT_LOC,*) 'module_list./capture_env: line51:module:commandnotfound'
+      WRITE(OUTPUT_LOC,*) 'hostname: gintama'
+      WRITE(OUTPUT_LOC,*) 'module_list./capture_env: line45:module:commandnotfound'
 
       END SUBROUTINE ENV
 

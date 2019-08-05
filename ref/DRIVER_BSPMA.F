@@ -43,6 +43,7 @@ CONTAINS
    USE MG_STENCIL_MOD
    USE MG_PROFILING_MOD
    USE MG_SUM_GRID_MOD
+   !USE MPI
 
    IMPLICIT NONE
 
@@ -78,6 +79,11 @@ CONTAINS
          TIME_START,              &  ! Timing variable
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
+      
+      INTEGER :: RANK
+     !  REAL(KIND=MG_REAL8) :: & 
+     !     total_time
+     !     comm_time
 
       ! ---------------------
       ! Executable Statements
@@ -90,9 +96,10 @@ CONTAINS
       ! -------------------
 
       CALL MG_CP_RESTART_GRID (GRID, RESTART_FIRST_PASS, STARTING_SPIKE, STARTING_TSTEP, GSUM, IERR )
-
+      CALL MPI_BARRIER(MPI_COMM_MG, IERR)
       TIME_START_ALL = MG_TIMER()
-
+      !total_time = 0.0
+      !comm_time = 0.0
       DO ISPIKE = STARTING_SPIKE, NSPIKES
 
          IF (RESTART_FIRST_PASS .EQV. .FALSE.) THEN
@@ -100,7 +107,11 @@ CONTAINS
          END IF
 
          DO TSTEP = STARTING_TSTEP, NTSTEPS
+            IF(MYPE == ROOTPE) THEN
+               110 FORMAT("Current Step ", I4, ", Total Step ", I4)
+               WRITE(*,110) TSTEP, NTSTEPS
 
+            END IF 
 #if defined _MG_MPI
             TIME_START = MG_TIMER()
             IF ( STENCIL == STENCIL_2D5PT .OR. STENCIL == STENCIL_3D7PT ) THEN
@@ -133,12 +144,12 @@ CONTAINS
                      IF ( MYPE == ROOTPE ) THEN
                         ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
                         IF ( ERROR_ITER > ERROR_TOL ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                           !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
                            IERR = -1
                            CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
                         END IF
                         IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                           !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
                         END IF
                      END IF
                   END IF
@@ -158,6 +169,11 @@ CONTAINS
 
       ! Final correctness check
       NUM_ERRORS = 0
+
+      CALL MPI_COMM_RANK(MPI_COMM_MG, RANK, IERR)
+      WRITE(*, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_WALL_PE
+ 100  FORMAT("RANK", I4, ", Comm Time: ", F12.3, ", Total Time: ", F12.3)
+
       DO IVAR = 1, NVARS
          CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
          CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID(Final check)', IVAR )
@@ -166,7 +182,7 @@ CONTAINS
          IF ( MYPE == ROOTPE ) THEN
             ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
             IF ( ERROR_ITER > ERROR_TOL ) THEN
-               WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+               !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
                NUM_ERRORS = NUM_ERRORS + 1
             END IF
          END IF
