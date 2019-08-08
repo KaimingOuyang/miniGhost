@@ -80,7 +80,8 @@ CONTAINS
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
       
-      INTEGER :: RANK
+      INTEGER :: RANK, NODE, DUMMY, PSIZE
+      CHARACTER(LEN=64) LOG_FILE
      !  REAL(KIND=MG_REAL8) :: & 
      !     total_time
      !     comm_time
@@ -133,26 +134,6 @@ CONTAINS
                   CALL MG_STENCIL ( GRID(0,0,0,IVAR), IVAR, IERR )
                   CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_STENCIL', IVAR )
                   MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
-
-                  ! Reduction across GRID option
-                  IF ( GRIDS_TO_SUM(IVAR) ) THEN
-                     TIME_START_2 = MG_TIMER ()
-                     CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
-                     CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
-                     MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
-
-                     IF ( MYPE == ROOTPE ) THEN
-                        ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-                        IF ( ERROR_ITER > ERROR_TOL ) THEN
-                           !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                           IERR = -1
-                           CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
-                        END IF
-                        IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
-                           !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                        END IF
-                     END IF
-                  END IF
                END DO
             END IF
 
@@ -171,22 +152,26 @@ CONTAINS
       NUM_ERRORS = 0
 
       CALL MPI_COMM_RANK(MPI_COMM_MG, RANK, IERR)
-      WRITE(*, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_BSPMA_PE + MG_PERF%TIME_STENCIL_PE
- 100  FORMAT("RANK", I4, ", Comm Time: ", F12.3, ", Stencil Time: ", F12.3, ", Total Time: ", F12.3)
-
-      DO IVAR = 1, NVARS
-         CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
-         CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID(Final check)', IVAR )
-         MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
-
-         IF ( MYPE == ROOTPE ) THEN
-            ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-            IF ( ERROR_ITER > ERROR_TOL ) THEN
-               !WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-               NUM_ERRORS = NUM_ERRORS + 1
-            END IF
+      CALL MPI_COMM_SIZE(MPI_COMM_MG, PSIZE, IERR)
+      NODE = RANK / 36
+      WRITE(LOG_FILE, "(A, I0)") "timelog/NODE-", NODE
+      WRITE(*,"(A)") LOG_FILE
+      
+      IF(RANK == 0) THEN
+         OPEN(UNIT=10, FILE=LOG_FILE)
+         WRITE(10, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_BSPMA_PE + MG_PERF%TIME_STENCIL_PE
+         CLOSE(10)
+         CALL MPI_SEND(DUMMY, 1, MPI_INT, RANK + 1, 0, MPI_COMM_MG, IERR)
+      ELSE
+         CALL MPI_RECV(DUMMY, 1, MPI_INT, RANK - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
+         OPEN(UNIT=10, FILE=LOG_FILE, ACCESS = 'APPEND')
+         WRITE(10, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_BSPMA_PE + MG_PERF%TIME_STENCIL_PE
+         CLOSE(10)
+         IF(RANK /= PSIZE - 1) THEN
+            CALL MPI_SEND(DUMMY, 1, MPI_INT, RANK + 1, 0, MPI_COMM_MG, IERR)
          END IF
-      END DO
+      END IF
+ 100  FORMAT("RANK - ", I0, ", Comm: ", F0.3, ", Stencil: ", F0.3, ", Total: ", F0.3)
 
       IF ( MYPE == ROOTPE ) THEN
          IF ( NUM_ERRORS == 0 ) THEN
