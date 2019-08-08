@@ -139,7 +139,7 @@ CONTAINS
                MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + STENCIL_TIME
 
             END IF
-            WRITE(*,"(A,I0,A,I0,A,F0.3)") "RANK ", RANK, ", ITER ", TSTEP, ", STENCIL: ", STENCIL_TIME
+            !WRITE(*,"(A,I0,A,I0,A,F0.3)") "RANK ", RANK, ", ITER ", TSTEP, ", STENCIL: ", STENCIL_TIME
             !CALL MG_CP_CHECKPOINT ( GRID, TSTEP, ISPIKE, GSUM, IERR )
 
          END DO ! Time step
@@ -172,13 +172,13 @@ CONTAINS
          ELSE   
             OPEN(UNIT=10, FILE=LOG_FILE, ACCESS = 'APPEND')
          END IF
-         WRITE(10, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_BSPMA_PE + MG_PERF%TIME_STENCIL_PE
+         WRITE(10, 100) RANK, MG_PERF%TIME_BSPMA_PE, MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_BSPMA_PE + MG_PERF%TIME_STENCIL_PE, MG_PERF%TIME_WALL_PE
          CLOSE(10)
          IF(RANK /= PSIZE - 1) THEN
             CALL MPI_SEND(DUMMY, 1, MPI_INT, RANK + 1, 0, MPI_COMM_MG, IERR)
          END IF
       END IF
- 100  FORMAT("RANK - ", I0, ", Comm: ", F0.3, ", Stencil: ", F0.3, ", Total: ", F0.3)
+ 100  FORMAT("RANK - ", I0, ", Comm: ", F0.3, ", Stencil: ", F0.3, ", Total: ", F0.3, ", Wall: ", F0.3)
 
 
       ! Final correctness check

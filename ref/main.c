@@ -26,12 +26,13 @@
 //
 // ************************************************************************
 //@header
-
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <sched.h>
+#include <unistd.h>
 #if defined _MG_MPI
 #include "mpi.h"
 #endif
@@ -77,6 +78,21 @@ int
 int check_input ( Input_params *param );
 void print_help_message ();
 void MG_Assert ( int ierr, char *error_msg );
+
+void output_affinity(int rank){
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    sched_getaffinity(0, sizeof(cpu_set_t), &mask);
+    int nproc = sysconf(_SC_NPROCESSORS_ONLN);
+    int i;
+    char buffer[64];
+    for (i = 0; i < nproc; i++) {
+        sprintf(buffer+i, "%d", CPU_ISSET(i, &mask));
+    }   
+    printf("rank %d -  %s\n", rank, buffer);
+    fflush(stdout);
+}
+
 
 #if defined _F2C_UPPER_CASE
 #define MINI_GHOST MINI_GHOST
@@ -371,7 +387,7 @@ int main ( int argc, char** argv )
 
    ierr = check_input ( &param );
    MG_Assert ( ierr, "illegal input parameter(s)" );
-
+   output_affinity(mype);
    MINI_GHOST (
                 &param.scaling,
                 &param.nx,
