@@ -80,7 +80,7 @@ CONTAINS
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
       
-      INTEGER :: RANK, NODE, DUMMY, PSIZE
+      INTEGER :: RANK, NODE, DUMMY, PSIZE, TOTAL_NODE
       CHARACTER(LEN=64) LOG_FILE
      !  REAL(KIND=MG_REAL8) :: & 
      !     total_time
@@ -154,7 +154,8 @@ CONTAINS
       CALL MPI_COMM_RANK(MPI_COMM_MG, RANK, IERR)
       CALL MPI_COMM_SIZE(MPI_COMM_MG, PSIZE, IERR)
       NODE = RANK / 36
-      WRITE(LOG_FILE, "(A, I0)") "timelog/NODE-", NODE
+      TOTAL_NODE = PSIZE / 36
+      WRITE(LOG_FILE, "(A, I0, A, I0)") "timelog/NODE", TOTAL_NODE, "-", NODE
       WRITE(*,"(A)") LOG_FILE
       
       IF(RANK == 0) THEN
