@@ -32,7 +32,7 @@ OBJS_F = MG_CONSTANTS.o MG_OPTIONS.o MG_UTILS.o \
 
 #######
 
-OBJS_MG = main.o $(OBJS_F)
+OBJS_MG = main.o $(OBJS_F) sample.o
 
 ######################################################################################
 
@@ -41,7 +41,8 @@ all ::  $(EXEC)
 ####################### Create executable #######################
 
 $(EXEC): $(OBJS_MG) $(COBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS_MG) $(LIBS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS_MG) $(LIBS) 
+#$(HOME)/ANL/installed/mpich-pip-steal-chance/lib/libmpi.a
 
 MG_ENV.F:
 	./capture_env "$(FC)" "$(CC)" "$(LD)" "$(FFLAGS)" "$(CFLAGS)" "$(ARCH)"
@@ -79,7 +80,7 @@ realclean::
 
 ############################### Dependencies #########################################
 
-main.o: default-settings.h
+main.o: default-settings.h sample.o
 
 DRIVER_BSPMA.o: MG_CONSTANTS.o MG_BSPMA.o MG_BSPMA_DIAGS.o MG_STENCIL.o \
 		MG_PROFILING.o MG_SUM_GRID.o

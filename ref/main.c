@@ -33,6 +33,9 @@
 #include <string.h>
 #include <sched.h>
 #include <unistd.h>
+
+void sample_process_and_task_();
+
 #if defined _MG_MPI
 #include "mpi.h"
 #endif
@@ -175,6 +178,9 @@ int main ( int argc, char** argv )
    ierr = MPI_Comm_rank ( MPI_COMM_WORLD, &mype );
 
    ierr = MPI_Comm_size ( MPI_COMM_WORLD, &numpes );
+   if(mype == 0){
+      sample_process_and_task_();
+   }
 #else
     mype = 0;
     numpes = 1;

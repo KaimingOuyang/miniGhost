@@ -49,9 +49,9 @@ ENABLE_CHECKPT_H5PART=FALSE
 H5PART_PATH=/home/thkorde/projects/mantevo/install/$(COMPILER_SUITE)
 
 # Compilers
-FC=mpif90
+FC=mpif90 -fpie -pie -pthread -rdynamic
 #FC=ftn
-CC=mpicc
+CC=mpicc -fpie -pie -pthread -rdynamic
 #CC=cc
 
 CFLAGS = $(PROTOCOL)
@@ -158,7 +158,7 @@ endif
 F_INCLUDE=$(H5PART_INCLUDES)
 
 LD=$(FC)
-LDFLAGS=$(CFLAGS)
+LDFLAGS=$(CFLAGS) -pthread
 LIBS=$(H5PART_LIBS)
 
 include make_targets
