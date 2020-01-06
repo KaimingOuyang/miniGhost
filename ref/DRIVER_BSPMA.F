@@ -90,7 +90,7 @@ CONTAINS
       ! -------------------
 
       CALL MG_CP_RESTART_GRID (GRID, RESTART_FIRST_PASS, STARTING_SPIKE, STARTING_TSTEP, GSUM, IERR )
-
+      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
 
       DO ISPIKE = STARTING_SPIKE, NSPIKES
@@ -100,7 +100,10 @@ CONTAINS
          END IF
 
          DO TSTEP = STARTING_TSTEP, NTSTEPS
-
+ 100        FORMAT("Current iteration ", I0)
+            IF(MYPE == ROOTPE) THEN
+               WRITE(*, 100) TSTEP
+            END IF
 #if defined _MG_MPI
             TIME_START = MG_TIMER()
             IF ( STENCIL == STENCIL_2D5PT .OR. STENCIL == STENCIL_3D7PT ) THEN

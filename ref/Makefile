@@ -36,7 +36,7 @@
 PROTOCOL = -D_MG_MPI
 
 # Option: Select a compiler - pgi, gnu, intel, cray
-COMPILER_SUITE=pgi
+COMPILER_SUITE=gnu
 
 # Option: Select checkpoint methods to include
 ### Compile to include MPI-IO checkpointing capability.
@@ -49,20 +49,20 @@ ENABLE_CHECKPT_H5PART=FALSE
 H5PART_PATH=/home/thkorde/projects/mantevo/install/$(COMPILER_SUITE)
 
 # Compilers
-#FC=mpif90
-FC=ftn
-#CC=mpicc
-CC=cc
+FC=mpif90
+#FC=ftn
+CC=mpicc
+#CC=cc
 
 CFLAGS = $(PROTOCOL)
 # C main calling Fortran subroutine:
-CFLAGS += -Df2c_
+CFLAGS += -Df2c_ -fpie -pie -rdynamic
 
 FFLAGS = $(PROTOCOL)
 F_INCLUDE=
 
 # Variable precision: -D_INT8 and/or -D_REAL8.
-FFLAGS += -D_MG_INT4 -D_MG_REAL8
+FFLAGS += -D_MG_INT4 -D_MG_REAL8 -fpie -pie -rdynamic
 
 ################################################################################
 ## Setup Checkpoint Features
@@ -157,8 +157,8 @@ endif
 
 F_INCLUDE=$(H5PART_INCLUDES)
 
-LD=$(CC)
-LDFLAGS=$(CFLAGS)
+LD=$(FC)
+LDFLAGS=$(CFLAGS) -pthread
 LIBS=$(H5PART_LIBS)
 
 include make_targets
