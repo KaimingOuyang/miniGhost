@@ -42,7 +42,89 @@ MODULE MG_PACK_MOD
    IMPLICIT NONE
 
 CONTAINS
+   SUBROUTINE MG_MPI_PACK(GRID, IERR)
+   USE MG_OPTIONS_MOD
+      REAL(KIND=MG_REAL8) ::      &
+         TIME_START,              &
+         TIME_START_DIR
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1, 1:NVARS), INTENT(IN) :: &
+         GRID
+      INTEGER, INTENT(OUT) :: &
+         IERR           ! Return status
+      INTEGER :: POSITION, PID
+
+      IF ( NUMPES == 1 ) &
+         RETURN
+      !PID = GETPID()
+      !WRITE(*,*) "my pid ", PID
+      !call SLEEP(10)
+      !TIME_START = MG_TIMER()
+      IF ( NEIGHBORS(BACK) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+         !WRITE(*,*) "BACK PACK TYPE = ", BACKFRONT_DATATYPE
+         call MPI_PACK(GRID( 0, 0, 1, 1 ), 1, BACKFRONT_DATATYPE, SEND_BUFFER_BACK, NVARS*(NY+2)*(NX+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
+
+         MG_PERF%TIME_PACK_Z_PE = MG_PERF%TIME_PACK_Z_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_BACK = COUNT_SEND_BACK + NVARS*(NY+2)*(NX+2)
+      END IF
+
+      IF ( NEIGHBORS(FRONT) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+         call MPI_PACK(GRID( 0, 0, NZ, 1 ), 1, BACKFRONT_DATATYPE, SEND_BUFFER_FRONT, NVARS*(NY+2)*(NX+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
    
+         MG_PERF%TIME_PACK_Z_PE = MG_PERF%TIME_PACK_Z_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_FRONT = COUNT_SEND_FRONT + NVARS*(NY+2)*(NX+2)
+      END IF
+
+      IF ( NEIGHBORS(EAST) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+
+         !WRITE(*,*) "EAST PACK TYPE = ", EASTWEST_DATATYPE
+         call MPI_PACK(GRID ( NX, 0, 0, 1 ), 1, EASTWEST_DATATYPE, SEND_BUFFER_EAST, NVARS*(NZ+2)*(NY+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
+
+         MG_PERF%TIME_PACK_X_PE = MG_PERF%TIME_PACK_X_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_EAST = COUNT_SEND_EAST + NVARS*(NZ+2)*(NY+2)
+      END IF
+
+      IF ( NEIGHBORS(WEST) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+         call MPI_PACK(GRID ( 1, 0, 0, 1 ), 1, EASTWEST_DATATYPE, SEND_BUFFER_WEST, NVARS*(NZ+2)*(NY+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
+
+         MG_PERF%TIME_PACK_X_PE = MG_PERF%TIME_PACK_X_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_WEST = COUNT_SEND_WEST + NVARS*(NZ+2)*(NY+2)
+      END IF
+
+      IF ( NEIGHBORS(NORTH) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+         call MPI_PACK(GRID ( 0, NY, 0, 1 ), 1, NORTHSOUTH_DATATYPE, SEND_BUFFER_NORTH, NVARS*(NZ+2)*(NX+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
+
+         MG_PERF%TIME_PACK_Y_PE = MG_PERF%TIME_PACK_Y_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_NORTH = COUNT_SEND_NORTH + NVARS*(NZ+2)*(NX+2)
+      END IF
+
+      IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
+         TIME_START_DIR = MG_TIMER ()
+         POSITION = 0
+         call MPI_PACK(GRID ( 0, 1, 0, 1 ), 1, NORTHSOUTH_DATATYPE, SEND_BUFFER_SOUTH, NVARS*(NZ+2)*(NX+2)*MG_REAL, POSITION, MPI_COMM_WORLD, IERR)
+
+         MG_PERF%TIME_PACK_Y_PE = MG_PERF%TIME_PACK_Y_PE + MG_TIMER () - &
+                                  TIME_START_DIR
+         COUNT_SEND_SOUTH = COUNT_SEND_SOUTH + NVARS*(NZ+2)*(NX+2)
+      END IF
+      MG_PERF%TIME_PACK_PE = MG_PERF%TIME_PACK_PE + MG_TIMER() - TIME_START
+   END SUBROUTINE MG_MPI_PACK
+
+
    SUBROUTINE MG_PACK ( GRID, IERR )
    
       ! ---------------------

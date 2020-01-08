@@ -77,10 +77,11 @@ CONTAINS
       COUNT_SEND_WEST  = 0
       COUNT_SEND_BACK  = 0
       COUNT_SEND_FRONT = 0
- 
-      DO IVAR = 1, NVARS    ! This routine shared with SVAF, so loop over NVARS
-         CALL MG_PACK ( GRID(0,0,0,IVAR),  IERR )
-      END DO
+      
+      call MG_MPI_PACK(GRID, IERR)
+!       DO IVAR = 1, NVARS    ! This routine shared with SVAF, so loop over NVARS
+!          CALL MG_PACK ( GRID(0,0,0,IVAR),  IERR )
+!       END DO
 
       CALL MG_SEND_BSPMA ( IERR )
 

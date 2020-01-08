@@ -73,7 +73,6 @@ MODULE MG_OPTIONS_MOD
    ! ---------
    ! Variables
    ! ---------
-
    INTEGER ::                      &
 
       NX, NY, NZ,                  &  ! Local domain dimensions.
@@ -95,7 +94,13 @@ MODULE MG_OPTIONS_MOD
 
       CP_METHOD,                   &
       CP_INTERVAL,                 &
-      RESTART_CP_NUM
+      RESTART_CP_NUM              
+
+   INTEGER ::                      &
+      BACKFRONT_DATATYPE,          &
+      EASTWEST_DATATYPE,           &
+      NORTHSOUTH_DATATYPE          
+
 
    CHARACTER*(1024) ::             &
       CP_FILE,                     &
