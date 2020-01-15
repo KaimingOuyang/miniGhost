@@ -210,7 +210,6 @@ MODULE MG_CONSTANTS_MOD
       SEND_BUFFER_FRONT_SIZE
 
    INTEGER(KIND=MG_INT),   DIMENSION(:), ALLOCATABLE ::      &
-
       MSG_REQS,                    &
       MSG_TAGS,                    &
       NEIGHBORS,                   &
@@ -231,5 +230,7 @@ MODULE MG_CONSTANTS_MOD
       SEND_BUFFER_WEST,            & 
       SEND_BUFFER_NORTH,           & 
       SEND_BUFFER_SOUTH              
-
+      
+   INTEGER(KIND=MG_INT),  DIMENSION(:,:), ALLOCATABLE ::      &
+      MSG_STATUS
 END MODULE MG_CONSTANTS_MOD

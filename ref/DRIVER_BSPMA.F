@@ -129,6 +129,7 @@ CONTAINS
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
 
+      INTEGER :: PID
       ! ---------------------
       ! Executable Statements
       ! ---------------------
@@ -145,6 +146,9 @@ CONTAINS
       call CREATE_BACKFRONT_DATATYPE()
       call CREATE_EASTWEST_DATATYPE()
       call CREATE_NORTHSOUTH_DATATYPE()
+      !PID = GETPID()
+      !WRITE(*,*) "PID ", PID
+      !call sleep(8)
 
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
@@ -174,6 +178,23 @@ CONTAINS
             END IF
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif
+      101   FORMAT(F10.3, " ", I0, " ", I0)
+            IF (TSTEP == 10 .and. MYPE < 36) THEN
+               IF(MYPE == 0) THEN
+                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
+                  CLOSE(10)
+                  call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
+               ELSE
+                  call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
+                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
+                  CLOSE(10)
+                  if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN
+                     call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
+                  end if
+               END IF
+            END IF
 
             IF ( STENCIL /= STENCIL_NONE ) THEN
                DO IVAR = 1, NVARS
@@ -238,6 +259,10 @@ CONTAINS
             WRITE(*,*)
          END IF
       END IF
+
+      call MPI_Type_free(BACKFRONT_DATATYPE, IERR)
+      call MPI_Type_free(EASTWEST_DATATYPE, IERR)
+      call MPI_Type_free(NORTHSOUTH_DATATYPE, IERR)
 
       RETURN
 

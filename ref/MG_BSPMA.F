@@ -59,6 +59,7 @@ CONTAINS
       ! ------------------
       ! Local Declarations
       ! ------------------
+      
 
       INTEGER(KIND=MG_INT) :: &
          IVAR          ! Counter
@@ -68,8 +69,11 @@ CONTAINS
       ! ---------------------
 
       IERR = 0
-
-      CALL MG_IRECV ( IERR )
+      INTER_NODE_SIZE = 0
+      INTRA_NODE_SIZE = 0
+      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      COMM_TIME_START = MG_TIMER()
+      CALL MG_MPI_IRECV ( GRID, IERR )
 
       COUNT_SEND_NORTH = 0
       COUNT_SEND_SOUTH = 0
@@ -78,14 +82,17 @@ CONTAINS
       COUNT_SEND_BACK  = 0
       COUNT_SEND_FRONT = 0
       
-      call MG_MPI_PACK(GRID, IERR)
+      !call MG_MPI_PACK(GRID, IERR)
 !       DO IVAR = 1, NVARS    ! This routine shared with SVAF, so loop over NVARS
 !          CALL MG_PACK ( GRID(0,0,0,IVAR),  IERR )
 !       END DO
 
-      CALL MG_SEND_BSPMA ( IERR )
+      CALL MG_MPI_SEND_BSPMA ( GRID, IERR )
 
-      CALL MG_UNPACK_BSPMA ( GRID, IERR )   ! This routine not shared with SVAF.
+      CALL MPI_WAITALL ( MAX_NUM_SENDS + MAX_NUM_RECVS, MSG_REQS, MSG_STATUS, IERR )
+      COMM_TIME_END = MG_TIMER()
+      
+      !CALL MG_UNPACK_BSPMA ( GRID, IERR )   ! This routine not shared with SVAF.
 
    END SUBROUTINE MG_BSPMA
    

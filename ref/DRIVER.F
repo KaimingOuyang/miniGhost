@@ -191,6 +191,7 @@
       CALL MG_ASSERT ( IERR, 'MINIGHOST: PERF_REPORT', COMM_METHOD )
 
       ! Done. Deallocate memory and terminate.
+      call MPI_Comm_free(MPI_COMM_MG, IERR)
 
       IF ( ALLOCATED ( GRID ) ) &
          DEALLOCATE ( GRID )
@@ -224,7 +225,8 @@
          DEALLOCATE ( MSG_REQS )
       IF ( ALLOCATED ( MSG_TAGS ) ) &
          DEALLOCATE ( MSG_TAGS )
-
+      IF ( ALLOCATED ( MSG_STATUS ) ) &
+         DEALLOCATE ( MSG_STATUS )
       RETURN
 
    END SUBROUTINE MINI_GHOST

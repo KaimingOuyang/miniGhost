@@ -35,7 +35,6 @@ MODULE MG_UNPACK_BSPMA_MOD
    IMPLICIT NONE
 
 CONTAINS
-   
    SUBROUTINE MG_UNPACK_BSPMA ( GRID, IERR )
    
       ! -------------------------------------------------------
@@ -127,10 +126,9 @@ CONTAINS
             TIME_START_DIR = MG_TIMER ()
 
             OFFSET = 0
-            call MG_MPI_GET_FACE( GRID, IWHICH, OFFSET, IERR )
-            !DO IVAR = 1, NVARS
-            !   CALL MG_GET_FACE ( GRID(0,0,0,IVAR), IWHICH, OFFSET, IERR )
-            !END DO
+            DO IVAR = 1, NVARS
+               CALL MG_GET_FACE ( GRID(0,0,0,IVAR), IWHICH, OFFSET, IERR )
+            END DO
             NUM_RECVS_OUTSTANDING = NUM_RECVS_OUTSTANDING - 1
             IF (IWHICH.EQ.BACK .OR. IWHICH.EQ.FRONT) THEN
                MG_PERF%TIME_UNPACK_Z_PE = MG_PERF%TIME_UNPACK_Z_PE +     &
