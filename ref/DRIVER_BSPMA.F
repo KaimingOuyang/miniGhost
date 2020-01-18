@@ -103,7 +103,7 @@ CONTAINS
       INTEGER, INTENT(OUT) :: &
          IERR                       ! Return status
 
-      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1, 1:NVARS), INTENT(INOUT) :: &
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1, 1:NVARS, 2), INTENT(INOUT) :: &
          GRID
 
       ! ------------------
@@ -129,7 +129,7 @@ CONTAINS
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
 
-      INTEGER :: PID
+      INTEGER :: PID, EXCHG
       ! ---------------------
       ! Executable Statements
       ! ---------------------
@@ -140,15 +140,15 @@ CONTAINS
       ! Begin time stepping
       ! -------------------
 
-      CALL MG_CP_RESTART_GRID (GRID, RESTART_FIRST_PASS, STARTING_SPIKE, STARTING_TSTEP, GSUM, IERR )
+      CALL MG_CP_RESTART_GRID (GRID(0,0,0,1,IN_GRID_ID), RESTART_FIRST_PASS, STARTING_SPIKE, STARTING_TSTEP, GSUM, IERR )
 
       ! create MPI datatype for packing and unpacking
       call CREATE_BACKFRONT_DATATYPE()
       call CREATE_EASTWEST_DATATYPE()
       call CREATE_NORTHSOUTH_DATATYPE()
-      !PID = GETPID()
-      !WRITE(*,*) "PID ", PID
-      !call sleep(8)
+      ! PID = GETPID()
+      ! WRITE(*,*) "PID ", PID
+      ! call sleep(8)
 
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
@@ -156,7 +156,7 @@ CONTAINS
       DO ISPIKE = STARTING_SPIKE, NSPIKES
 
          IF (RESTART_FIRST_PASS .EQV. .FALSE.) THEN
-            CALL MG_INSERT_SPIKE ( GRID, ISPIKE, IERR )
+            CALL MG_INSERT_SPIKE ( GRID(0,0,0,1,IN_GRID_ID), ISPIKE, IERR )
          END IF
 
          DO TSTEP = STARTING_TSTEP, NTSTEPS
@@ -167,7 +167,7 @@ CONTAINS
 #if defined _MG_MPI
             TIME_START = MG_TIMER()
             IF ( STENCIL == STENCIL_2D5PT .OR. STENCIL == STENCIL_3D7PT ) THEN
-               CALL MG_BSPMA ( GRID, IERR )
+               CALL MG_BSPMA ( GRID(0,0,0,1,IN_GRID_ID), IERR )
                CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA: MG_BSPMA', TSTEP )
             ELSE IF ( STENCIL == STENCIL_2D9PT .OR. STENCIL == STENCIL_3D27PT ) THEN
                CALL MG_BSPMA_DIAGS ( GRID, IERR )
@@ -178,54 +178,43 @@ CONTAINS
             END IF
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif
-      101   FORMAT(F10.3, " ", I0, " ", I0)
-            IF (TSTEP == 10 .and. MYPE < 36) THEN
-               IF(MYPE == 0) THEN
-                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
-                  CLOSE(10)
-                  call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
-               ELSE
-                  call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
-                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
-                  CLOSE(10)
-                  if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN
-                     call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
-                  end if
-               END IF
-            END IF
 
             IF ( STENCIL /= STENCIL_NONE ) THEN
                DO IVAR = 1, NVARS
                   TIME_START = MG_TIMER()
-                  CALL MG_STENCIL ( GRID(0,0,0,IVAR), IVAR, IERR )
+                  call MG_MPI_STENCIL(GRID(0,0,0,1,IN_GRID_ID), GRID(0,0,0,1,OUT_GRID_ID), IVAR, IERR)
+                  ! CALL MG_STENCIL ( GRID(0,0,0,IVAR), IVAR, IERR )
                   CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_STENCIL', IVAR )
                   MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
 
                   ! Reduction across GRID option
-                  IF ( GRIDS_TO_SUM(IVAR) ) THEN
-                     TIME_START_2 = MG_TIMER ()
-                     CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
-                     CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
-                     MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
+                  ! IF ( GRIDS_TO_SUM(IVAR) ) THEN
+                  !    TIME_START_2 = MG_TIMER ()
+                  !    CALL MG_SUM_GRID ( GRID(0,0,0,IVAR,OUT_GRID_ID), IVAR, GSUM, IERR )
+                  !    CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
+                  !    MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
 
-                     IF ( MYPE == ROOTPE ) THEN
-                        ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-                        IF ( ERROR_ITER > ERROR_TOL ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                           IERR = -1
-                           CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
-                        END IF
-                        IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                        END IF
-                     END IF
-                  END IF
+                  !    IF ( MYPE == ROOTPE ) THEN
+                  !       ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
+                  !       IF ( ERROR_ITER > ERROR_TOL ) THEN
+                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                  !          IERR = -1
+                  !          CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
+                  !       END IF
+                  !       IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
+                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                  !       END IF
+                  !    END IF
+                  ! END IF
                END DO
             END IF
 
-            CALL MG_CP_CHECKPOINT ( GRID, TSTEP, ISPIKE, GSUM, IERR )
+            EXCHG = IN_GRID_ID 
+            IN_GRID_ID = OUT_GRID_ID
+            OUT_GRID_ID = EXCHG 
+
+
+            ! CALL MG_CP_CHECKPOINT ( GRID, TSTEP, ISPIKE, GSUM, IERR )
 
          END DO ! Time step
 
@@ -237,28 +226,28 @@ CONTAINS
       MG_PERF%TIME_WALL_PE = MG_TIMER() - TIME_START_ALL
 
       ! Final correctness check
-      NUM_ERRORS = 0
-      DO IVAR = 1, NVARS
-         CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
-         CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID(Final check)', IVAR )
-         MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
+      ! NUM_ERRORS = 0
+      ! DO IVAR = 1, NVARS
+      !    CALL MG_SUM_GRID ( GRID(0,0,0,IVAR,IN_GRID_ID), IVAR, GSUM, IERR )
+      !    CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID(Final check)', IVAR )
+      !    MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
 
-         IF ( MYPE == ROOTPE ) THEN
-            ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-            IF ( ERROR_ITER > ERROR_TOL ) THEN
-               WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-               NUM_ERRORS = NUM_ERRORS + 1
-            END IF
-         END IF
-      END DO
+      !    IF ( MYPE == ROOTPE ) THEN
+      !       ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
+      !       IF ( ERROR_ITER > ERROR_TOL ) THEN
+      !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+      !          NUM_ERRORS = NUM_ERRORS + 1
+      !       END IF
+      !    END IF
+      ! END DO
 
-      IF ( MYPE == ROOTPE ) THEN
-         IF ( NUM_ERRORS == 0 ) THEN
-            WRITE(*,*)
-            WRITE(*,*) 'Computation within error tolerance.'
-            WRITE(*,*)
-         END IF
-      END IF
+      ! IF ( MYPE == ROOTPE ) THEN
+      !    IF ( NUM_ERRORS == 0 ) THEN
+      !       WRITE(*,*)
+      !       WRITE(*,*) 'Computation within error tolerance.'
+      !       WRITE(*,*)
+      !    END IF
+      ! END IF
 
       call MPI_Type_free(BACKFRONT_DATATYPE, IERR)
       call MPI_Type_free(EASTWEST_DATATYPE, IERR)

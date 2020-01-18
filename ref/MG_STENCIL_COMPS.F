@@ -168,6 +168,44 @@ CONTAINS
    END SUBROUTINE MG_STENCIL_2D9PT
    
 !  ======================================================================================
+   SUBROUTINE MG_MPI_STENCIL_3D7PT(IN_GRID, OUT_GRID, IERR)
+      ! ---------------------
+      ! Argument Declarations
+      ! ---------------------
+
+      INTEGER, INTENT(OUT) :: &
+         IERR           ! Return status
+
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1), INTENT(INOUT) :: &
+         IN_GRID
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1), INTENT(INOUT) :: &
+         OUT_GRID
+      ! ------------------
+      ! Local Declarations
+      ! ------------------
+
+      INTEGER :: &
+         I, J, K
+
+      ! ---------------------
+      ! Executable Statements
+      ! ---------------------
+   
+      IERR = 0
+
+      DO K = 1, NZ 
+         DO J = 1, NY
+            DO I = 1, NX
+               OUT_GRID(I,J,K) =            ( IN_GRID(I,J,K-1) +                    &
+                                             IN_GRID(I-1,J,K) +                 &
+                             IN_GRID(I,J-1,K) + IN_GRID(I  ,J,K) + IN_GRID(I,J+1,K)   &
+                                           + IN_GRID(I+1,J,K)                   &
+                                             + IN_GRID(I,J,K+1) ) / SEVEN
+
+            END DO
+         END DO
+      END DO
+   END SUBROUTINE MG_MPI_STENCIL_3D7PT
 
    SUBROUTINE MG_STENCIL_3D7PT ( GRID, IERR )
    

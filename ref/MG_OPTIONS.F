@@ -94,6 +94,8 @@ MODULE MG_OPTIONS_MOD
 
       CP_METHOD,                   &
       CP_INTERVAL,                 &
+      OUT_GRID_ID,                &
+      IN_GRID_ID,                &
       RESTART_CP_NUM              
 
    INTEGER ::                      &

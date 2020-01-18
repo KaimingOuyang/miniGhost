@@ -71,192 +71,56 @@ CONTAINS
 #if defined _MG_MPI
 
       TIME_START = MG_TIMER()
-
-      ! --------------
-      ! Post receives:
-      ! --------------
-
-      NUM_RECVS = 0
-
-      COUNT_RECV_NORTH = RECV_BUFFER_NORTH_SIZE
-      COUNT_RECV_SOUTH = RECV_BUFFER_SOUTH_SIZE
-      COUNT_RECV_EAST  = RECV_BUFFER_EAST_SIZE
-      COUNT_RECV_WEST  = RECV_BUFFER_WEST_SIZE
-      COUNT_RECV_BACK  = RECV_BUFFER_BACK_SIZE
-      COUNT_RECV_FRONT = RECV_BUFFER_FRONT_SIZE
-
       ! Back boundary
    
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(BACK), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_BACK
-         ELSE
-          ! WRITE(*, "('I am in intra comm to ', I0, ', comm size ', I0, ', local = ', I0)") NEIGHBORS(BACK), COUNT_RECV_BACK, LOCAL
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_BACK
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, BACKFRONT_DATATYPE, &
                           NEIGHBORS(BACK), MSG_TAGS(FRONT),              &
                           MPI_COMM_MG, MSG_REQS(BACK), IERR )
-         MG_PERF%TIME_RECV_Z_PE = MG_PERF%TIME_RECV_Z_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_BACK
-         IF ( COUNT_RECV_BACK > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_BACK
-         END IF
-         IF ( COUNT_RECV_BACK < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_BACK
-         END IF
-
       END IF
    
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(FRONT), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_FRONT
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_FRONT
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, NZ+1, 1), 1, BACKFRONT_DATATYPE,   &
                           NEIGHBORS(FRONT), MSG_TAGS(BACK),                &
                           MPI_COMM_MG, MSG_REQS(FRONT), IERR )
-         MG_PERF%TIME_RECV_Z_PE = MG_PERF%TIME_RECV_Z_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_FRONT
-         IF ( COUNT_RECV_FRONT > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_FRONT
-         END IF
-         IF ( COUNT_RECV_FRONT < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_FRONT
-         END IF
-
       END IF
    
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(EAST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_EAST
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_EAST
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (NX+1, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(EAST), MSG_TAGS(WEST),              &
                           MPI_COMM_MG, MSG_REQS(EAST), IERR )
-         MG_PERF%TIME_RECV_X_PE = MG_PERF%TIME_RECV_X_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_EAST
-         IF ( COUNT_RECV_EAST > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_EAST
-         END IF
-         IF ( COUNT_RECV_EAST < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_EAST
-         END IF
-
       END IF
    
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(WEST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_WEST
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_WEST
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(WEST), MSG_TAGS(EAST),                &
                           MPI_COMM_MG, MSG_REQS(WEST), IERR )
-         MG_PERF%TIME_RECV_X_PE = MG_PERF%TIME_RECV_X_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_WEST
-         IF ( COUNT_RECV_WEST > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_WEST
-         END IF
-         IF ( COUNT_RECV_WEST < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_WEST
-         END IF
-
       END IF
    
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(NORTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_NORTH
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_NORTH
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, NY+1, 0, 1), 1, NORTHSOUTH_DATATYPE,   &
                           NEIGHBORS(NORTH), MSG_TAGS(SOUTH),                &
                           MPI_COMM_MG, MSG_REQS(NORTH), IERR )
-         MG_PERF%TIME_RECV_Y_PE = MG_PERF%TIME_RECV_Y_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_NORTH
-         IF ( COUNT_RECV_NORTH > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_NORTH
-         END IF
-         IF ( COUNT_RECV_NORTH < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_NORTH
-         END IF
-
       END IF
    
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(SOUTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_SOUTH
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_SOUTH
-         END IF
-         TIME_START_DIR = MG_TIMER ()
-         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, NORTHSOUTH_DATATYPE, &
                           NEIGHBORS(SOUTH), MSG_TAGS(NORTH),                &
                           MPI_COMM_MG, MSG_REQS(SOUTH), IERR )
-         MG_PERF%TIME_RECV_Y_PE = MG_PERF%TIME_RECV_Y_PE + MG_TIMER () - &
-                                  TIME_START_DIR
-
-         MG_PERF%RECV_COUNT  = MG_PERF%RECV_COUNT + COUNT_RECV_SOUTH
-         IF ( COUNT_RECV_SOUTH > MG_PERF%RECV_COUNT_MAX ) THEN
-            MG_PERF%RECV_COUNT_MAX = COUNT_RECV_SOUTH
-         END IF
-         IF ( COUNT_RECV_SOUTH < MG_PERF%RECV_COUNT_MIN ) THEN
-            MG_PERF%RECV_COUNT_MIN = COUNT_RECV_SOUTH
-         END IF
 
       END IF
 
       MG_PERF%TIME_RECV_PE = MG_PERF%TIME_RECV_PE + MG_TIMER() - TIME_START
-
-      MG_PERF%NUM_RECVS = MG_PERF%NUM_RECVS + NUM_RECVS
 
 #endif _MPI
 

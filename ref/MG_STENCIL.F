@@ -34,11 +34,34 @@ MODULE MG_STENCIL_MOD
    USE MG_UTILS_MOD
    USE MG_BOUNDARY_CONDITIONS_MOD
    USE MG_STENCIL_COMPS_MOD
+   USE MG_OPTIONS_MOD
 
    IMPLICIT NONE
 
 CONTAINS
-   
+   SUBROUTINE MG_MPI_STENCIL( IN_GRID, OUT_GRID, IVAR, IERR)
+   ! ---------------------
+      ! Argument Declarations
+      ! ---------------------
+
+      INTEGER(KIND=MG_INT), INTENT(IN) :: &
+         IVAR           ! Pointer to variable to be updated.
+
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1, NVARS), INTENT(INOUT) :: &
+         IN_GRID
+
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1, NVARS), INTENT(INOUT) :: &
+         OUT_GRID
+
+      INTEGER(KIND=MG_INT), INTENT(OUT) :: &
+         IERR           ! Return status
+
+      ! check correctness
+      ! CALL MG_BOUNDARY_CONDITIONS ( IN_GRID(0,0,0,IVAR), IVAR, IERR )
+
+      CALL MG_MPI_STENCIL_3D7PT ( IN_GRID(0,0,0,IVAR), OUT_GRID(0,0,0,IVAR), IERR )
+   END SUBROUTINE MG_MPI_STENCIL
+
    SUBROUTINE MG_STENCIL ( GRID, IVAR, IERR )
 
       ! ---------------------

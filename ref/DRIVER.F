@@ -99,8 +99,9 @@
          IERR,                    &  ! Return status
          I,                       &  ! Counter
          IVAR                        ! Counter (over variables)
+      INTEGER ::  PID
 
-      REAL(KIND=MG_REAL), DIMENSION(:,:,:,:), ALLOCATABLE :: &
+      REAL(KIND=MG_REAL), DIMENSION(:,:,:,:,:), ALLOCATABLE :: &
          GRID
 
       REAL(KIND=MG_REAL8) ::      &
@@ -127,6 +128,9 @@
       COMM_METHOD      = COMM_METHOD_IN
       BC               = BC_IN
       ERROR_TOL        = 1.0 / (10.0**ERROR_TOL_IN)
+
+      IN_GRID_ID = 1
+      OUT_GRID_ID = 2
 
       IF ( REPORT_DIFFUSION_IN == 0 ) THEN
          REPORT_DIFFUSION = NTSTEPS
@@ -156,12 +160,14 @@
 
       ! Initialize performance capture
       CALL MG_PERF_INIT ( IERR )
-
+      ! PID = GETPID()
+      ! WRITE(*,*) "PID ", PID
+      ! call sleep(8)
       ! Allocate local domain, including space for all variables, including ghosts:
-      ALLOCATE ( GRID( 0:NX+1, 0:NY+1, 0:NZ+1, 1:NVARS ), STAT = IERR )
-      CALL MG_ASSERT ( IERR, 'GRID_INIT: ALLOCATE ( GRID )', (NX+2)*(NY+2)*(NZ+2)*NVARS )
+      ALLOCATE ( GRID( 0:NX+1, 0:NY+1, 0:NZ+1, 1:NVARS, 2 ), STAT = IERR )
+      CALL MG_ASSERT ( IERR, 'GRID_INIT: ALLOCATE ( GRID )', (NX+2)*(NY+2)*(NZ+2)*NVARS*2 )
 
-      CALL MG_GRID_INIT ( GRID, IERR )
+      CALL MG_GRID_INIT ( GRID(0,0,0,1,1), IERR )
 
       ! Allocate workspace needed by the specified computation.
       CALL MG_BUFINIT ( IERR )
