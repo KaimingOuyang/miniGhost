@@ -878,11 +878,7 @@ MODULE MG_PROFILING_MOD
       END DO
       TIME_WALL_AVG = TIME_WALL_SUM / REAL(NUMPES)
       TIME_WALL_STDDEV = MG_COMPUTE_STDDEV ( TIME_WALL_ALL, TIME_WALL_AVG )
-      CALL get_environment_variable("MINIGHOST_OUT", output_file)
-      OPEN(unit=9, file=output_file, position="append")
-      WRITE(9, 500) NUMPES, NVARS, TIME_WALL_AVG, TIME_WALL_STDDEV, TIME_COMM_AVG, TIME_COMM_STDDEV, TIME_STENCIL_AVG, TIME_STENCIL_STDDEV
- 500  FORMAT(I0, ' ', I0, ' Wall-TIME ', F10.3, ' ', F10.3, ' COMM-TIME ', F10.3, ' ', F10.3, ' COMP-TIME ', F10.3, ' ', F10.3)
-      CLOSE(9)
+      
 
       TIME_COMM_METHOD_MIN = TIME_COMM_METHOD_ALL( 1 )
       TIME_COMM_METHOD_MAX = TIME_COMM_METHOD_ALL( 1 )
@@ -1251,6 +1247,12 @@ MODULE MG_PROFILING_MOD
 
       CLOCK_RES = REAL(MPI_WTICK ( ))
 
+      CALL get_environment_variable("MINIGHOST_OUT", output_file)
+      OPEN(unit=9, file=output_file, position="append")
+      WRITE(9, 500) NUMPES, TIME_WALL_AVG, TIME_COMM_METHOD_AVG, TIME_STENCIL_AVG
+ 500  FORMAT(I0, ' Wall-TIME ', F10.3, ' COMM-TIME ', F10.3, ' COMP-TIME ', F10.3)
+      CLOSE(9)
+      
       IF ( REPORT_PERF > 0 ) THEN
 
          DO J = 1, 2
