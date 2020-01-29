@@ -129,7 +129,7 @@ CONTAINS
          TIME_START_2,            &  ! Timing variable
          TIME_START_ALL              ! Timing variable
 
-      INTEGER :: PID, EXCHG
+      INTEGER :: PID, EXCHG, LOCAL_COMM
       ! ---------------------
       ! Executable Statements
       ! ---------------------
@@ -149,7 +149,7 @@ CONTAINS
       ! PID = GETPID()
       ! WRITE(*,*) "PID ", PID
       ! call sleep(8)
-
+      call MPI_COMM_SPLIT_TYPE(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, LOCAL_COMM, IERR)
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
 
@@ -176,16 +176,18 @@ CONTAINS
                IERR = -1
                CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA: Unknown stencil for boundary exchange', STENCIL )
             END IF
+            CALL MPI_BARRIER(LOCAL_COMM, IERR)
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
-#endif
-
+#endif   
+            
             IF ( STENCIL /= STENCIL_NONE ) THEN
+               TIME_START = MG_TIMER()
                DO IVAR = 1, NVARS
-                  TIME_START = MG_TIMER()
+                  
                   call MG_MPI_STENCIL(GRID(0,0,0,1,IN_GRID_ID), GRID(0,0,0,1,OUT_GRID_ID), IVAR, IERR)
                   ! CALL MG_STENCIL ( GRID(0,0,0,IVAR), IVAR, IERR )
                   CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_STENCIL', IVAR )
-                  MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
+                  
 
                   ! Reduction across GRID option
                   ! IF ( GRIDS_TO_SUM(IVAR) ) THEN
@@ -207,6 +209,7 @@ CONTAINS
                   !    END IF
                   ! END IF
                END DO
+               MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
             END IF
 
             EXCHG = IN_GRID_ID 
