@@ -86,6 +86,7 @@ CONTAINS
       ! Back boundary
    
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + BACK
          CALL MPI_ISEND ( GRID( 0, 0, 1, 1 ), 1, BACKFRONT_DATATYPE, &
                           NEIGHBORS(BACK), MSG_TAGS(BACK),                &
@@ -96,6 +97,7 @@ CONTAINS
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + FRONT
          CALL MPI_ISEND ( GRID( 0, 0, NZ, 1 ), 1, BACKFRONT_DATATYPE, &
                           NEIGHBORS(FRONT), MSG_TAGS(FRONT),                &
@@ -105,6 +107,7 @@ CONTAINS
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + EAST
          CALL MPI_ISEND ( GRID ( NX, 0, 0, 1 ), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(EAST), MSG_TAGS(EAST),                &
@@ -114,6 +117,7 @@ CONTAINS
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + WEST
          CALL MPI_ISEND ( GRID ( 1, 0, 0, 1 ), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(WEST), MSG_TAGS(WEST),                &
@@ -123,6 +127,7 @@ CONTAINS
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + NORTH
          CALL MPI_ISEND ( GRID ( 0, NY, 0, 1 ), 1, NORTHSOUTH_DATATYPE, &
                           NEIGHBORS(NORTH), MSG_TAGS(NORTH),                &
@@ -132,6 +137,7 @@ CONTAINS
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
+         NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + SOUTH
          CALL MPI_ISEND ( GRID ( 0, 1, 0, 1 ), 1, NORTHSOUTH_DATATYPE, &
                           NEIGHBORS(SOUTH), MSG_TAGS(SOUTH),                &

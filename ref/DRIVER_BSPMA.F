@@ -247,7 +247,7 @@ CONTAINS
                IERR = -1
                CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA: Unknown stencil for boundary exchange', STENCIL )
             END IF
-            CALL MPI_BARRIER(LOCAL_COMM, IERR)
+            ! CALL MPI_BARRIER(LOCAL_COMM, IERR)
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif   
             

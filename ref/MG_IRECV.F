@@ -72,8 +72,9 @@ CONTAINS
 
       TIME_START = MG_TIMER()
       ! Back boundary
-   
+      NUM_RECVS = 0
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, BACKFRONT_DATATYPE, &
                           NEIGHBORS(BACK), MSG_TAGS(FRONT),              &
                           MPI_COMM_MG, MSG_REQS(BACK), IERR )
@@ -82,6 +83,7 @@ CONTAINS
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, NZ+1, 1), 1, BACKFRONT_DATATYPE,   &
                           NEIGHBORS(FRONT), MSG_TAGS(BACK),                &
                           MPI_COMM_MG, MSG_REQS(FRONT), IERR )
@@ -90,6 +92,7 @@ CONTAINS
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (NX+1, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(EAST), MSG_TAGS(WEST),              &
                           MPI_COMM_MG, MSG_REQS(EAST), IERR )
@@ -98,6 +101,7 @@ CONTAINS
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(WEST), MSG_TAGS(EAST),                &
                           MPI_COMM_MG, MSG_REQS(WEST), IERR )
@@ -106,6 +110,7 @@ CONTAINS
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, NY+1, 0, 1), 1, NORTHSOUTH_DATATYPE,   &
                           NEIGHBORS(NORTH), MSG_TAGS(SOUTH),                &
                           MPI_COMM_MG, MSG_REQS(NORTH), IERR )
@@ -114,6 +119,7 @@ CONTAINS
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
+         NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, NORTHSOUTH_DATATYPE, &
                           NEIGHBORS(SOUTH), MSG_TAGS(NORTH),                &
                           MPI_COMM_MG, MSG_REQS(SOUTH), IERR )
