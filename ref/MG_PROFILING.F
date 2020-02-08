@@ -34,7 +34,7 @@ MODULE MG_PROFILING_MOD
       USE MG_CONSTANTS_MOD
       USE MG_UTILS_MOD
       USE MG_ENV_MOD
-
+      USE MG_OPTIONS_MOD
       IMPLICIT NONE
 
    ! Keep track of computation and communication. 
@@ -200,7 +200,6 @@ MODULE MG_PROFILING_MOD
 !     ==================================================================
 
       SUBROUTINE MG_PERF_REPORT ( COMM_METHOD, STENCIL, IERR )
-
       IMPLICIT NONE
 
       ! Argument Declarations
@@ -511,7 +510,14 @@ MODULE MG_PROFILING_MOD
          TIME_BC_ALL(NUMPES),           &
          TIME_SUMGRID_ALL(NUMPES),      &
          TIME_SUMGRID_COMP_ALL(NUMPES), &
-         TIME_SUMGRID_COMM_ALL(NUMPES)
+         TIME_SUMGRID_COMM_ALL(NUMPES), &
+         TIME_BREAK_DOWN_ON_NODE_CONTIG_ALL(NUMPES), &
+         TIME_BREAK_DOWN_ON_NODE_NONCONTIG_ALL(NUMPES), &
+         TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL(NUMPES), &
+         TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL(NUMPES)
+
+      REAL(KIND=MG_REAL8) :: ON_NODE_CONTIG_AVG = 0.0, ON_NODE_NONCONTIG = 0.0, &
+                     OFF_NODE_CONTIG_AVG = 0.0, OFF_NODE_NONCONTIG_AVG = 0.0
 
       REAL(KIND=MG_REAL8), PARAMETER ::    &
          GIGA = 1000000000.0D+0
@@ -528,7 +534,21 @@ MODULE MG_PROFILING_MOD
 #if defined _MG_MPI
 
       ! Gather timings to root process.
+      CALL MPI_GATHER ( BREAK_DOWN_TIME(ON_NODE_CONTIG), 1, MPI_REAL8,           &
+                        TIME_BREAK_DOWN_ON_NODE_CONTIG_ALL,        1, MPI_REAL8,           &
+                        ROOTPE, MPI_COMM_WORLD, IERR )
 
+      CALL MPI_GATHER ( BREAK_DOWN_TIME(ON_NODE_NONCONTIG), 1, MPI_REAL8,           &
+                        TIME_BREAK_DOWN_ON_NODE_NONCONTIG_ALL,        1, MPI_REAL8,           &
+                        ROOTPE, MPI_COMM_WORLD, IERR )
+
+      CALL MPI_GATHER ( BREAK_DOWN_TIME(OFF_NODE_CONTIG), 1, MPI_REAL8,           &
+                        TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL,        1, MPI_REAL8,           &
+                        ROOTPE, MPI_COMM_WORLD, IERR )
+
+      CALL MPI_GATHER ( BREAK_DOWN_TIME(OFF_NODE_CONTIG), 1, MPI_REAL8,           &
+                        TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL,        1, MPI_REAL8,           &
+                        ROOTPE, MPI_COMM_WORLD, IERR ) 
       CALL MPI_GATHER ( MG_PERF%TIME_WALL_PE, 1, MPI_REAL8,           &
                         TIME_WALL_ALL,        1, MPI_REAL8,           &
                         ROOTPE, MPI_COMM_WORLD, IERR )
@@ -865,6 +885,17 @@ MODULE MG_PROFILING_MOD
       GRECV_NODE_NUM_MIN   = THESE_MINNED(NUM_TO_MIN)
       NUM_TO_MIN = NUM_TO_MIN + 1
       GRECV_NODE_COUNT_MIN = THESE_MINNED(NUM_TO_MIN)
+
+      DO I = 1, NUMPES
+         ON_NODE_CONTIG_AVG = ON_NODE_CONTIG_AVG + TIME_BREAK_DOWN_ON_NODE_CONTIG_ALL( I )
+         ON_NODE_NONCONTIG = ON_NODE_NONCONTIG + TIME_BREAK_DOWN_ON_NODE_NONCONTIG_ALL( I )
+         OFF_NODE_CONTIG = ON_NODE_NONCONTIG + TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL( I )
+         OFF_NODE_NONCONTIG = ON_NODE_NONCONTIG + TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL( I )
+      END DO
+      ON_NODE_CONTIG_AVG = ON_NODE_CONTIG_AVG / REAL(NUMPES)
+      ON_NODE_NONCONTIG = ON_NODE_NONCONTIG / REAL(NUMPES)
+      OFF_NODE_CONTIG = OFF_NODE_CONTIG / REAL(NUMPES)
+      OFF_NODE_NONCONTIG = OFF_NODE_NONCONTIG / REAL(NUMPES)
 
       ! Root process writes out global data:
       TIME_WALL_MIN = TIME_WALL_ALL( 1 )
@@ -1249,8 +1280,8 @@ MODULE MG_PROFILING_MOD
 
       CALL get_environment_variable("MINIGHOST_OUT", output_file)
       OPEN(unit=9, file=output_file, position="append")
-      WRITE(9, 500) NUMPES, TIME_WALL_AVG, TIME_COMM_METHOD_AVG, TIME_STENCIL_AVG
- 500  FORMAT(I0, ' Wall-TIME ', F10.3, ' COMM-TIME ', F10.3, ' COMP-TIME ', F10.3)
+      WRITE(9, 500) NX, TIME_WAIT_AVG, TIME_STENCIL_AVG, ON_NODE_CONTIG_AVG, ON_NODE_NONCONTIG, OFF_NODE_CONTIG, OFF_NODE_NONCONTIG
+ 500  FORMAT(I0, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3)
       CLOSE(9)
       
       IF ( REPORT_PERF > 0 ) THEN

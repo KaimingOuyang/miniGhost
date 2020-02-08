@@ -28,7 +28,7 @@
 MODULE DRIVER_BSPMA_MOD
 
 CONTAINS
-   SUBROUTINE CREATE_BACKFRONT_DATATYPE()
+   SUBROUTINE CREATE_BACKFRONT_DATATYPE() 
    USE MG_OPTIONS_MOD
       INTEGER :: IERR
       INTEGER :: SIZE
@@ -78,6 +78,76 @@ CONTAINS
       !WRITE(*,*) "Create NORTHSOUTH_DATATYPE sucessfully = ", NORTHSOUTH_DATATYPE
    END SUBROUTINE CREATE_NORTHSOUTH_DATATYPE
 
+
+   SUBROUTINE MARK_ON_OFF_NODE_NEIGHBOR()
+   USE MG_CONSTANTS_MOD
+   USE MG_OPTIONS_MOD
+      INTEGER :: MY_NODE, NEIGHBOR_NODE
+      INTEGER :: CORE_PER_NODE = 36 ! Bebop broadwell node
+
+      MY_NODE = MYPE / CORE_PER_NODE
+      BREAK_DOWN_TIME(:) = 0.0
+      ! Back boundary
+      IF ( NEIGHBORS(BACK) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(BACK) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(BACK) = 1
+         ELSE
+            ON_OFF_NODE(BACK) = 0
+         END IF
+      END IF
+   
+      ! Front boundary
+      IF ( NEIGHBORS(FRONT) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(FRONT) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(FRONT) = 1
+         ELSE
+            ON_OFF_NODE(FRONT) = 0
+         END IF
+      END IF
+   
+      ! East boundary
+      IF ( NEIGHBORS(EAST) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(EAST) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(EAST) = 1
+         ELSE
+            ON_OFF_NODE(EAST) = 0
+         END IF
+      END IF
+   
+      ! West boundary
+      IF ( NEIGHBORS(WEST) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(WEST) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(WEST) = 1
+         ELSE
+            ON_OFF_NODE(WEST) = 0
+         END IF
+      END IF
+   
+      ! North boundary
+      IF ( NEIGHBORS(NORTH) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(NORTH) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(NORTH) = 1
+         ELSE
+            ON_OFF_NODE(NORTH) = 0
+         END IF
+      END IF
+   
+      ! South boundary
+      IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
+         NEIGHBOR_NODE = NEIGHBORS(SOUTH) / CORE_PER_NODE
+         IF ( NEIGHBOR_NODE == MY_NODE) THEN
+            ON_OFF_NODE(SOUTH) = 1
+         ELSE
+            ON_OFF_NODE(SOUTH) = 0
+         END IF
+      END IF
+      
+   END SUBROUTINE MARK_ON_OFF_NODE_NEIGHBOR
 
    SUBROUTINE DRIVER_BSPMA ( GRID, IERR )
 
@@ -149,7 +219,8 @@ CONTAINS
       ! PID = GETPID()
       ! WRITE(*,*) "PID ", PID
       ! call sleep(8)
-      call MPI_COMM_SPLIT_TYPE(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, LOCAL_COMM, IERR)
+      ! call MPI_COMM_SPLIT_TYPE(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, LOCAL_COMM, IERR)
+      call MARK_ON_OFF_NODE_NEIGHBOR()
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
 

@@ -35,6 +35,78 @@ MODULE MG_UNPACK_BSPMA_MOD
    IMPLICIT NONE
 
 CONTAINS
+   SUBROUTINE MG_MPI_WAITANY_BSPMA()
+      ! ------------------
+      ! Local Declarations
+      ! ------------------
+   
+      INTEGER :: &
+         IERR, &
+         IWHICH,                      &  ! MPI_Wait_any SRC process
+         I, IVAR, L,                  &  ! Counters
+         NUM_RECVS_OUTSTANDING,       &  ! Keep track of progress
+         NUM_SENDS_OUTSTANDING,       &
+         OFFSET
+   
+#if defined _MG_MPI
+      INTEGER ::     &
+         ISTAT(MPI_STATUS_SIZE)
+#endif _MG_MPI
+
+      REAL(KIND=MG_REAL8) ::      &
+         TIME_START,              &
+         TIME_START_DIR,          &
+         TIME_WAIT,               &
+         TIME_WAIT_X,             &
+         TIME_WAIT_Y,             &
+         TIME_WAIT_Z
+
+      ! ---------------------
+      ! Executable Statements
+      ! ---------------------
+
+      IERR = 0
+
+      IF ( NUMPES == 1 ) &
+         RETURN
+
+#if defined _MG_MPI
+
+      ! Complete sends and receives. 
+      ! If recv, unpack into user space (domain face).
+
+      DO L = 1, NUM_RECVS + NUM_SENDS
+         TIME_START_DIR = MG_TIMER ()
+         CALL MPI_WAITANY ( MAX_NUM_SENDS + MAX_NUM_RECVS, MSG_REQS, IWHICH, ISTAT, IERR )
+         CALL MG_ASSERT ( IERR, 'MG_UNPACK_BSPMA: MPI_WAITANY', ISTAT(MPI_ERROR) ) 
+         IF ( IWHICH <= MAX_NUM_RECVS ) THEN
+            IF (IWHICH.EQ.BACK .OR. IWHICH.EQ.FRONT) THEN
+               ! contig data
+               IF (ON_OFF_NODE(IWHICH) == 1) THEN
+                  ! on-node
+                  BREAK_DOWN_TIME(ON_NODE_CONTIG) = BREAK_DOWN_TIME(ON_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+               ELSE
+                  ! off-node
+                  BREAK_DOWN_TIME(OFF_NODE_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+               END IF
+            ELSE IF (IWHICH.EQ.EAST .OR. IWHICH.EQ.WEST .OR. IWHICH.EQ.NORTH .OR. IWHICH.EQ.SOUTH) THEN
+               ! contig data
+               IF (ON_OFF_NODE(IWHICH) == 1) THEN
+                  ! on-node
+                  BREAK_DOWN_TIME(ON_NODE_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               ELSE
+                  ! off-node
+                  BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               END IF
+            END IF
+         END IF
+      END DO
+
+#endif _MG_MPI
+
+      RETURN
+   END SUBROUTINE MG_MPI_WAITANY_BSPMA
+
    SUBROUTINE MG_UNPACK_BSPMA ( GRID, IERR )
    
       ! -------------------------------------------------------
