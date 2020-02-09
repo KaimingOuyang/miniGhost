@@ -220,7 +220,7 @@ CONTAINS
       ! PID = GETPID()
       ! WRITE(*,*) "PID ", PID
       ! call sleep(8)
-      ! call MPI_COMM_SPLIT_TYPE(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, LOCAL_COMM, IERR)
+      call MPI_COMM_SPLIT_TYPE(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, LOCAL_COMM, IERR)
       call MARK_ON_OFF_NODE_NEIGHBOR()
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
@@ -237,6 +237,7 @@ CONTAINS
                WRITE(*, 100) TSTEP
             END IF
 #if defined _MG_MPI
+            CALL MPI_BARRIER(LOCAL_COMM, IERR)
             TIME_START = MG_TIMER()
             IF ( STENCIL == STENCIL_2D5PT .OR. STENCIL == STENCIL_3D7PT ) THEN
                CALL MG_BSPMA ( GRID(0,0,0,1,IN_GRID_ID), IERR )
@@ -248,7 +249,7 @@ CONTAINS
                IERR = -1
                CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA: Unknown stencil for boundary exchange', STENCIL )
             END IF
-            ! CALL MPI_BARRIER(LOCAL_COMM, IERR)
+            CALL MPI_BARRIER(LOCAL_COMM, IERR)
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif   
             

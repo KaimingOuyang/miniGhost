@@ -546,9 +546,10 @@ MODULE MG_PROFILING_MOD
                         TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL,        1, MPI_REAL8,           &
                         ROOTPE, MPI_COMM_WORLD, IERR )
 
-      CALL MPI_GATHER ( BREAK_DOWN_TIME(OFF_NODE_CONTIG), 1, MPI_REAL8,           &
+      CALL MPI_GATHER ( BREAK_DOWN_TIME(OFF_NODE_NONCONTIG), 1, MPI_REAL8,           &
                         TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL,        1, MPI_REAL8,           &
                         ROOTPE, MPI_COMM_WORLD, IERR ) 
+      
       CALL MPI_GATHER ( MG_PERF%TIME_WALL_PE, 1, MPI_REAL8,           &
                         TIME_WALL_ALL,        1, MPI_REAL8,           &
                         ROOTPE, MPI_COMM_WORLD, IERR )
