@@ -87,6 +87,7 @@ CONTAINS
 
       MY_NODE = MYPE / CORE_PER_NODE
       BREAK_DOWN_TIME(:) = 0.0
+      ON_OFF_NODE(:) = -1
       ! Back boundary
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
          NEIGHBOR_NODE = NEIGHBORS(BACK) / CORE_PER_NODE
@@ -146,7 +147,7 @@ CONTAINS
             ON_OFF_NODE(SOUTH) = 0
          END IF
       END IF
-      
+      ! WRITE(*,*) "Rank ", MYPE, " - ", ON_OFF_NODE
    END SUBROUTINE MARK_ON_OFF_NODE_NEIGHBOR
 
    SUBROUTINE DRIVER_BSPMA ( GRID, IERR )
