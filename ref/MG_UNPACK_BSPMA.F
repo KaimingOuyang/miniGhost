@@ -28,6 +28,7 @@
 MODULE MG_UNPACK_BSPMA_MOD
 
    USE MG_CONSTANTS_MOD
+   USE MG_OPTIONS_MOD
    USE MG_UTILS_MOD
    USE MG_GET_FACE_MOD
    USE MG_PROFILING_MOD
@@ -83,45 +84,63 @@ CONTAINS
             I = IWHICH - MAX_NUM_RECVS
             IF (I.EQ.BACK .OR. I.EQ.FRONT) THEN
                ! contig data
-               IF (ON_OFF_NODE(I) == 1) THEN
+               IF (ON_NODE(I) == 1) THEN
                   ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_CONTIG) = BREAK_DOWN_TIME(ON_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
                ELSE
                   ! off-node
                   ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
                END IF
-            ELSE IF (I.EQ.EAST .OR. I.EQ.WEST .OR. I.EQ.NORTH .OR. I.EQ.SOUTH) THEN
+            ELSE IF (I.EQ.EAST .OR. I.EQ.WEST) THEN
                ! contig data
-               IF (ON_OFF_NODE(I) == 1) THEN
+               IF (ON_NODE(I) == 1) THEN
                   ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
                ELSE
                   ! off-node
                   ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               END IF
+            ELSE IF (I.EQ.NORTH .OR. I.EQ.SOUTH) THEN
+               IF (ON_NODE(I) == 1) THEN
+                  ! on-node
+                  BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               ELSE
+                  ! off-node
+                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
                END IF
             END IF
          ELSE
             IF (IWHICH.EQ.BACK .OR. IWHICH.EQ.FRONT) THEN
                ! contig data
-               IF (ON_OFF_NODE(IWHICH) == 1) THEN
+               IF (ON_NODE(IWHICH) == 1) THEN
                   ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_CONTIG) = BREAK_DOWN_TIME(ON_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
                ELSE
                   ! off-node
-                  ! WRITE(*,*) MYPE, " Recv Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
                END IF
-            ELSE IF (IWHICH.EQ.EAST .OR. IWHICH.EQ.WEST .OR. IWHICH.EQ.NORTH .OR. IWHICH.EQ.SOUTH) THEN
+            ELSE IF (IWHICH.EQ.EAST .OR. IWHICH.EQ.WEST) THEN
                ! contig data
-               IF (ON_OFF_NODE(IWHICH) == 1) THEN
+               IF (ON_NODE(IWHICH) == 1) THEN
                   ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
                ELSE
                   ! off-node
-                  ! WRITE(*,*) MYPE, " Recv Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               END IF
+            ELSE IF (IWHICH.EQ.NORTH .OR. IWHICH.EQ.SOUTH) THEN
+               IF (ON_NODE(IWHICH) == 1) THEN
+                  ! on-node
+                  BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+               ELSE
+                  ! off-node
+                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+                  BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
                END IF
             END IF
          END IF
