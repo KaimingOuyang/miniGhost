@@ -75,55 +75,110 @@ CONTAINS
       NUM_RECVS = 0
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, BACKFRONT_DATATYPE, &
                           NEIGHBORS(BACK), MSG_TAGS(FRONT),              &
                           MPI_COMM_MG, MSG_REQS(BACK), IERR )
+         IF (ON_NODE(BACK) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
    
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (0, 0, NZ+1, 1), 1, BACKFRONT_DATATYPE,   &
                           NEIGHBORS(FRONT), MSG_TAGS(BACK),                &
                           MPI_COMM_MG, MSG_REQS(FRONT), IERR )
+         IF (ON_NODE(FRONT) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
    
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (NX+1, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(EAST), MSG_TAGS(WEST),              &
                           MPI_COMM_MG, MSG_REQS(EAST), IERR )
+         ! contig data
+         IF (ON_NODE(EAST) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
    
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(WEST), MSG_TAGS(EAST),                &
                           MPI_COMM_MG, MSG_REQS(WEST), IERR )
+         ! contig data
+         IF (ON_NODE(WEST) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
    
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (0, NY+1, 0, 1), 1, NORTHSOUTH_DATATYPE,   &
                           NEIGHBORS(NORTH), MSG_TAGS(SOUTH),                &
                           MPI_COMM_MG, MSG_REQS(NORTH), IERR )
+         IF (ON_NODE(NORTH) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
    
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
          NUM_RECVS = NUM_RECVS + 1
+         TIME_START_DIR = MG_TIMER ()
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, NORTHSOUTH_DATATYPE, &
                           NEIGHBORS(SOUTH), MSG_TAGS(NORTH),                &
                           MPI_COMM_MG, MSG_REQS(SOUTH), IERR )
-
+         IF (ON_NODE(SOUTH) == 1) THEN
+            ! on-node
+            BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         ELSE
+            ! off-node
+            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+            BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+         END IF
       END IF
 
       MG_PERF%TIME_RECV_PE = MG_PERF%TIME_RECV_PE + MG_TIMER() - TIME_START
