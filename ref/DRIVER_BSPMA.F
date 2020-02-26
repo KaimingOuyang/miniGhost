@@ -93,10 +93,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(BACK) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(BACK) = 1
-            ON_NODE_XY_CNT = ON_NODE_XY_CNT + 2
+            ON_NODE_XY_CNT = 1
          ELSE
             ON_NODE(BACK) = 0
-            OFF_NODE_XY_CNT = OFF_NODE_XY_CNT + 2
+            OFF_NODE_XY_CNT = 1
          END IF
       END IF
    
@@ -105,10 +105,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(FRONT) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(FRONT) = 1
-            ON_NODE_XY_CNT = ON_NODE_XY_CNT + 2
+            ON_NODE_XY_CNT = 1
          ELSE
             ON_NODE(FRONT) = 0
-            OFF_NODE_XY_CNT = OFF_NODE_XY_CNT + 2
+            OFF_NODE_XY_CNT = 1
          END IF
       END IF
    
@@ -117,10 +117,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(EAST) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(EAST) = 1
-            ON_NODE_YZ_CNT = ON_NODE_YZ_CNT + 2
+            ON_NODE_YZ_CNT = 1
          ELSE
             ON_NODE(EAST) = 0
-            OFF_NODE_YZ_CNT = OFF_NODE_YZ_CNT + 2
+            OFF_NODE_YZ_CNT = 1
          END IF
       END IF
    
@@ -129,10 +129,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(WEST) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(WEST) = 1
-            ON_NODE_YZ_CNT = ON_NODE_YZ_CNT + 2
+            ON_NODE_YZ_CNT = 1
          ELSE
             ON_NODE(WEST) = 0
-            OFF_NODE_YZ_CNT = OFF_NODE_YZ_CNT + 2
+            OFF_NODE_YZ_CNT = 1
          END IF
       END IF
    
@@ -141,10 +141,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(NORTH) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(NORTH) = 1
-            ON_NODE_XZ_CNT = ON_NODE_XZ_CNT + 2
+            ON_NODE_XZ_CNT = 1
          ELSE
             ON_NODE(NORTH) = 0
-            OFF_NODE_XZ_CNT = OFF_NODE_XZ_CNT + 2
+            OFF_NODE_XZ_CNT = 1
          END IF
       END IF
    
@@ -153,10 +153,10 @@ CONTAINS
          NEIGHBOR_NODE = NEIGHBORS(SOUTH) / CORE_PER_NODE
          IF ( NEIGHBOR_NODE == MY_NODE) THEN
             ON_NODE(SOUTH) = 1
-            ON_NODE_XZ_CNT = ON_NODE_XZ_CNT + 2
+            ON_NODE_XZ_CNT = 1
          ELSE
             ON_NODE(SOUTH) = 0
-            OFF_NODE_XZ_CNT = OFF_NODE_XZ_CNT + 2
+            OFF_NODE_XZ_CNT = 1
          END IF
       END IF
       ! WRITE(*,*) "Rank ", MYPE, " - ", ON_NODE
