@@ -179,7 +179,6 @@ CONTAINS
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif
       
-            COMP_TIME_START = MG_TIMER()
             IF ( STENCIL /= STENCIL_NONE ) THEN
                DO IVAR = 1, NVARS
                   TIME_START = MG_TIMER()
@@ -188,27 +187,27 @@ CONTAINS
                   MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
 
                   ! Reduction across GRID option
-                  IF ( GRIDS_TO_SUM(IVAR) ) THEN
-                     TIME_START_2 = MG_TIMER ()
-                     CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
-                     CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
-                     MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
+                  ! IF ( GRIDS_TO_SUM(IVAR) ) THEN
+                  !    TIME_START_2 = MG_TIMER ()
+                  !    CALL MG_SUM_GRID ( GRID(0,0,0,IVAR), IVAR, GSUM, IERR )
+                  !    CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
+                  !    MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
 
-                     IF ( MYPE == ROOTPE ) THEN
-                        ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-                        IF ( ERROR_ITER > ERROR_TOL ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                           IERR = -1
-                           CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
-                        END IF
-                        IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
-                           WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                        END IF
-                     END IF
-                  END IF
+                  !    IF ( MYPE == ROOTPE ) THEN
+                  !       ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
+                  !       IF ( ERROR_ITER > ERROR_TOL ) THEN
+                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                  !          IERR = -1
+                  !          CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
+                  !       END IF
+                  !       IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
+                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
+                  !       END IF
+                  !    END IF
+                  ! END IF
                END DO
             END IF
-            COMP_TIME_END = MG_TIMER()
+            
             ! profile communication and computation time 
             101   FORMAT(F10.3, " ", I0, " ", F10.3)
             IF (TSTEP == 10 .and. MYPE < 36) THEN
@@ -216,14 +215,14 @@ CONTAINS
                   OPEN(unit=10, file="minighost-profile.out", position="append")
                   ! OUTPUT comm time (ms), comm intra-node volumn, inter-node volumn, compute time (ms)
                   WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
-                  (COMP_TIME_END - COMP_TIME_START) * 1000.0
+                  COMP_TIME * 1000.0
                   CLOSE(10)
                   call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
                ELSE
                   call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
                   OPEN(unit=10, file="minighost-profile.out", position="append")
                   WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
-                  (COMP_TIME_END - COMP_TIME_START) * 1000.0
+                  COMP_TIME * 1000.0
                   CLOSE(10)
                   if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN
                      call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
