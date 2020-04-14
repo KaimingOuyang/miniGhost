@@ -178,24 +178,8 @@ CONTAINS
             END IF
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif
-      101   FORMAT(F10.3, " ", I0, " ", I0)
-            IF (TSTEP == 10 .and. MYPE < 36) THEN
-               IF(MYPE == 0) THEN
-                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
-                  CLOSE(10)
-                  call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
-               ELSE
-                  call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
-                  OPEN(unit=10, file="minighost-comm-profile.out", position="append")
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, INTRA_NODE_SIZE, INTER_NODE_SIZE
-                  CLOSE(10)
-                  if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN
-                     call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
-                  end if
-               END IF
-            END IF
-
+      
+            
             IF ( STENCIL /= STENCIL_NONE ) THEN
                DO IVAR = 1, NVARS
                   TIME_START = MG_TIMER()
@@ -225,6 +209,27 @@ CONTAINS
                END DO
             END IF
 
+            ! profile communication and computation time 
+            101   FORMAT(F10.3, " ", I0, " ", F10.3)
+            IF (TSTEP == 10 .and. MYPE < 36) THEN
+               IF(MYPE == 0) THEN
+                  OPEN(unit=10, file="minighost-profile.out", position="append")
+                  ! OUTPUT comm time (ms), comm intra-node volumn, inter-node volumn, compute time (ms)
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
+                  (COMP_TIME_END - COMP_TIME_START) * 1000.0
+                  CLOSE(10)
+                  call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
+               ELSE
+                  call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
+                  OPEN(unit=10, file="minighost-profile.out", position="append")
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
+                  (COMP_TIME_END - COMP_TIME_START) * 1000.0
+                  CLOSE(10)
+                  if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN
+                     call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
+                  end if
+               END IF
+            END IF
             CALL MG_CP_CHECKPOINT ( GRID, TSTEP, ISPIKE, GSUM, IERR )
 
          END DO ! Time step

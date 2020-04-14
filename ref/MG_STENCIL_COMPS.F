@@ -196,7 +196,7 @@ CONTAINS
 
 !$OMP PARALLEL
 !$OMP DO
-
+      COMP_TIME_START = MG_TIMER()
       DO K = 1, NZ 
          DO J = 1, NY
             DO I = 1, NX
@@ -209,7 +209,7 @@ CONTAINS
             END DO
          END DO
       END DO
-
+      COMP_TIME_END = MG_TIMER()
 !$OMP ENDDO
 !$OMP DO
 

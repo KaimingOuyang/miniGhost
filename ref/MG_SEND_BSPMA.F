@@ -87,13 +87,14 @@ CONTAINS
       ! Back boundary
    
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(BACK), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NY+2)*(NX+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NY+2)*(NX+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(BACK), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NY+2)*(NX+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NY+2)*(NX+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NY+2)*(NX+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + BACK
@@ -116,13 +117,14 @@ CONTAINS
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(FRONT), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NY+2)*(NX+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NY+2)*(NX+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(FRONT), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NY+2)*(NX+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NY+2)*(NX+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NY+2)*(NX+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + FRONT
@@ -145,13 +147,14 @@ CONTAINS
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(EAST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(EAST), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NZ+2)*(NY+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + EAST
@@ -174,13 +177,14 @@ CONTAINS
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(WEST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(WEST), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NY+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NZ+2)*(NY+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + WEST
@@ -203,13 +207,14 @@ CONTAINS
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(NORTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(NORTH), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NZ+2)*(NX+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + NORTH
@@ -232,13 +237,14 @@ CONTAINS
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(SOUTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(SOUTH), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + NVARS*(NZ+2)*(NX+2)
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + NVARS*(NZ+2)*(NX+2)
          TIME_START_DIR = MG_TIMER ()
          NUM_SENDS = NUM_SENDS + 1
          MSG_REQS_OFFSET = MAX_NUM_RECVS + SOUTH

@@ -876,11 +876,14 @@ MODULE MG_PROFILING_MOD
          TIME_WALL_SUM = TIME_WALL_SUM + TIME_WALL_ALL( I )
       END DO
       TIME_WALL_AVG = TIME_WALL_SUM / REAL(NUMPES)
-      TIME_WALL_STDDEV = MG_COMPUTE_STDDEV ( TIME_WALL_ALL, TIME_WALL_AVG )
-      OPEN(unit=9, file="myperf.out", position="append")
-      WRITE(9, 500) NUMPES, NVARS, TIME_WALL_AVG, TIME_WALL_STDDEV
- 500  FORMAT(I0, ' ', I0, ' ', F10.3, ' ', F10.3)
-      CLOSE(9)
+
+      ! CALL get_environment_variable("MINIGHOST_OUT", output_file)
+      ! TIME_WALL_STDDEV = MG_COMPUTE_STDDEV ( TIME_WALL_ALL, TIME_WALL_AVG )
+      
+ !      OPEN(unit=9, file=output_file, position="append")
+ !      WRITE(9, 500) NUMPES, NVARS, TIME_WALL_AVG, TIME_WALL_STDDEV
+ ! 500  FORMAT(I0, ' ', I0, ' ', F10.3, ' ', F10.3)
+ !      CLOSE(9)
 
       TIME_COMM_METHOD_MIN = TIME_COMM_METHOD_ALL( 1 )
       TIME_COMM_METHOD_MAX = TIME_COMM_METHOD_ALL( 1 )

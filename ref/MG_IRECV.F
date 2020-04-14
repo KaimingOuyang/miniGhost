@@ -88,14 +88,15 @@ CONTAINS
       ! Back boundary
    
       IF ( NEIGHBORS(BACK) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(BACK), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_BACK
-         ELSE
-          ! WRITE(*, "('I am in intra comm to ', I0, ', comm size ', I0, ', local = ', I0)") NEIGHBORS(BACK), COUNT_RECV_BACK, LOCAL
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_BACK
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(BACK), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_BACK
+         ! ELSE
+         !  ! WRITE(*, "('I am in intra comm to ', I0, ', comm size ', I0, ', local = ', I0)") NEIGHBORS(BACK), COUNT_RECV_BACK, LOCAL
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_BACK
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_BACK
          TIME_START_DIR = MG_TIMER ()
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, BACKFRONT_DATATYPE, &
@@ -117,13 +118,14 @@ CONTAINS
       ! Front boundary
    
       IF ( NEIGHBORS(FRONT) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(FRONT), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_FRONT
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_FRONT
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(FRONT), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_FRONT
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_FRONT
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_FRONT
          TIME_START_DIR = MG_TIMER ()
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, NZ+1, 1), 1, BACKFRONT_DATATYPE,   &
@@ -145,14 +147,15 @@ CONTAINS
       ! East boundary
    
       IF ( NEIGHBORS(EAST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(EAST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_EAST
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_EAST
-         END IF
-         TIME_START_DIR = MG_TIMER ()
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(EAST), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_EAST
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_EAST
+         ! END IF
+         ! TIME_START_DIR = MG_TIMER ()
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_EAST
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (NX+1, 0, 0, 1), 1, EASTWEST_DATATYPE, &
                           NEIGHBORS(EAST), MSG_TAGS(WEST),              &
@@ -173,13 +176,14 @@ CONTAINS
       ! West boundary
    
       IF ( NEIGHBORS(WEST) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(WEST), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_WEST
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_WEST
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(WEST), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_WEST
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_WEST
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_WEST
          TIME_START_DIR = MG_TIMER ()
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, EASTWEST_DATATYPE, &
@@ -201,13 +205,14 @@ CONTAINS
       ! North boundary
    
       IF ( NEIGHBORS(NORTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(NORTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_NORTH
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_NORTH
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(NORTH), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_NORTH
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_NORTH
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_NORTH
          TIME_START_DIR = MG_TIMER ()
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, NY+1, 0, 1), 1, NORTHSOUTH_DATATYPE,   &
@@ -229,13 +234,14 @@ CONTAINS
       ! South boundary
    
       IF ( NEIGHBORS(SOUTH) /= -1 ) THEN
-         call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(SOUTH), LOCAL)
-         IF (LOCAL == 0) THEN
-          ! inter-node comm
-          INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_SOUTH
-         ELSE
-          INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_SOUTH
-         END IF
+         ! call MPIU_GET_IS_LOCAL(MPI_COMM_MG, NEIGHBORS(SOUTH), LOCAL)
+         ! IF (LOCAL == 0) THEN
+         !  ! inter-node comm
+         !  INTER_NODE_SIZE = INTER_NODE_SIZE + COUNT_RECV_SOUTH
+         ! ELSE
+         !  INTRA_NODE_SIZE = INTRA_NODE_SIZE + COUNT_RECV_SOUTH
+         ! END IF
+         COMM_DATA_SIZE = COMM_DATA_SIZE + COUNT_RECV_SOUTH
          TIME_START_DIR = MG_TIMER ()
          NUM_RECVS = NUM_RECVS + 1
          CALL MPI_IRECV ( GRID (0, 0, 0, 1), 1, NORTHSOUTH_DATATYPE, &
