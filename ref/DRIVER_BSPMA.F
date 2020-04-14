@@ -179,7 +179,7 @@ CONTAINS
             MG_PERF%TIME_BSPMA_PE = MG_PERF%TIME_BSPMA_PE + MG_TIMER() - TIME_START
 #endif
       
-            
+            COMP_TIME_START = MG_TIMER()
             IF ( STENCIL /= STENCIL_NONE ) THEN
                DO IVAR = 1, NVARS
                   TIME_START = MG_TIMER()
@@ -208,7 +208,7 @@ CONTAINS
                   END IF
                END DO
             END IF
-
+            COMP_TIME_END = MG_TIMER()
             ! profile communication and computation time 
             101   FORMAT(F10.3, " ", I0, " ", F10.3)
             IF (TSTEP == 10 .and. MYPE < 36) THEN
