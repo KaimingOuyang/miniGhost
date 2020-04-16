@@ -214,14 +214,14 @@ CONTAINS
                IF(MYPE == 0) THEN
                   OPEN(unit=10, file="minighost-profile.out", position="append")
                   ! OUTPUT comm time (ms), comm intra-node volumn, inter-node volumn, compute time (ms)
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE * 8, &
                   COMP_TIME * 1000.0
                   CLOSE(10)
                   call MPI_SEND(PID, 1, MPI_INT, MYPE + 1, 0, MPI_COMM_MG, IERR)
                ELSE
                   call MPI_RECV(PID, 1, MPI_INT, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
                   OPEN(unit=10, file="minighost-profile.out", position="append")
-                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE, &
+                  WRITE(10,101)  (COMM_TIME_END - COMM_TIME_START) * 1000.0, COMM_DATA_SIZE * 8, &
                   COMP_TIME * 1000.0
                   CLOSE(10)
                   if(MYPE /= NUMPES - 1 .and. MYPE /= 35) THEN

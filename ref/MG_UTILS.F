@@ -73,7 +73,8 @@ CONTAINS
 
       REAL(KIND=MG_REAL), DIMENSION(:,:), ALLOCATABLE ::   &
          RSPIKE_LOC            ! Temporary for random number generator.
-
+      INTEGER, dimension(3) :: dims
+      INTEGER, dimension(3) :: periods
       ! ---------------------
       ! Executable Statements
       ! ---------------------
@@ -81,9 +82,15 @@ CONTAINS
       IERR = 0
 
 #if defined _MG_MPI
+      dims(1) = NPX
+      dims(2) = NPY
+      dims(3) = NPZ
+      periods(1) = 0
+      periods(2) = 0
+      periods(3) = 0
       ! Parallel processing configuration:
-
-      CALL MPI_COMM_DUP ( MPI_COMM_WORLD, MPI_COMM_MG, IERR )
+      CALL MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 0, MPI_COMM_MG, IERR)
+      ! CALL MPI_COMM_DUP ( MPI_COMM_WORLD, MPI_COMM_MG, IERR )
       CALL MG_ASSERT ( IERR, "MG_INIT: MPI_COMM_DUP(MPI_COMM_MG)", IERR )
 
       CALL MPI_ERRHANDLER_SET ( MPI_COMM_MG, MPI_ERRORS_ARE_FATAL, IERR )
