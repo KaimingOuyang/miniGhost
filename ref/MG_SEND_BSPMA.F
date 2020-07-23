@@ -132,14 +132,16 @@ CONTAINS
                           NEIGHBORS(EAST), MSG_TAGS(EAST),                &
                           MPI_COMM_MG, MSG_REQS(MSG_REQS_OFFSET), IERR )
          ! contig data
-         IF (ON_NODE(EAST) == 1) THEN
-            ! on-node
-            BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-         ELSE
-            ! off-node
-            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-            BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-         END IF
+         if (global_iteration /= 0) then
+            IF (ON_NODE(EAST) == 1) THEN
+               ! on-node
+               BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+            ELSE
+               ! off-node
+               ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+               BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+            END IF
+         end if
       END IF
    
       ! West boundary
@@ -152,14 +154,16 @@ CONTAINS
                           NEIGHBORS(WEST), MSG_TAGS(WEST),                &
                           MPI_COMM_MG, MSG_REQS(MSG_REQS_OFFSET), IERR )
           ! contig data
-         IF (ON_NODE(WEST) == 1) THEN
-            ! on-node
-            BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-         ELSE
-            ! off-node
-            ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-            BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-         END IF
+         if (global_iteration /= 0) then
+            IF (ON_NODE(WEST) == 1) THEN
+               ! on-node
+               BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+            ELSE
+               ! off-node
+               ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+               BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+            END IF
+         end if
       END IF
    
       ! North boundary

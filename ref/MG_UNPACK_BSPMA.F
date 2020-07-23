@@ -80,38 +80,39 @@ CONTAINS
          TIME_START_DIR = MG_TIMER ()
          CALL MPI_WAITANY ( MAX_NUM_SENDS + MAX_NUM_RECVS, MSG_REQS, IWHICH, ISTAT, IERR )
          CALL MG_ASSERT ( IERR, 'MG_UNPACK_BSPMA: MPI_WAITANY', ISTAT(MPI_ERROR) )
+         if (global_iteration /= 0) then
          IF ( IWHICH > MAX_NUM_RECVS ) THEN
             I = IWHICH - MAX_NUM_RECVS
-            IF (I.EQ.BACK .OR. I.EQ.FRONT) THEN
-               ! contig data
-               IF (ON_NODE(I) == 1) THEN
-                  ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
-               ELSE
-                  ! off-node
-                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+               IF (I.EQ.BACK .OR. I.EQ.FRONT) THEN
+                  ! contig data
+                  IF (ON_NODE(I) == 1) THEN
+                     ! on-node
+                     BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) = BREAK_DOWN_TIME(ON_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  ELSE
+                     ! off-node
+                     ! WRITE(*,*) MYPE, " Send Get OFF_NODE_CONTIG ", MG_TIMER () - TIME_START_DIR
+                     BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) = BREAK_DOWN_TIME(OFF_NODE_XY_CONTIG) + MG_TIMER () - TIME_START_DIR
+                  END IF
+               ELSE IF (I.EQ.EAST .OR. I.EQ.WEST) THEN
+                  ! contig data
+                  IF (ON_NODE(I) == 1) THEN
+                     ! on-node
+                     BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  ELSE
+                     ! off-node
+                     ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+                     BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  END IF
+               ELSE IF (I.EQ.NORTH .OR. I.EQ.SOUTH) THEN
+                  IF (ON_NODE(I) == 1) THEN
+                     ! on-node
+                     BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  ELSE
+                     ! off-node
+                     ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
+                     BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
+                  END IF
                END IF
-            ELSE IF (I.EQ.EAST .OR. I.EQ.WEST) THEN
-               ! contig data
-               IF (ON_NODE(I) == 1) THEN
-                  ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-               ELSE
-                  ! off-node
-                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-               END IF
-            ELSE IF (I.EQ.NORTH .OR. I.EQ.SOUTH) THEN
-               IF (ON_NODE(I) == 1) THEN
-                  ! on-node
-                  BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(ON_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-               ELSE
-                  ! off-node
-                  ! WRITE(*,*) MYPE, " Send Get OFF_NODE_NONCONTIG ", MG_TIMER () - TIME_START_DIR
-                  BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) = BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG) + MG_TIMER () - TIME_START_DIR
-               END IF
-            END IF
          ELSE
             IF (IWHICH.EQ.BACK .OR. IWHICH.EQ.FRONT) THEN
                ! contig data
@@ -144,6 +145,7 @@ CONTAINS
                END IF
             END IF
          END IF
+      end if
       END DO
 
 #endif _MG_MPI
