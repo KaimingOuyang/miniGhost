@@ -577,6 +577,9 @@ MODULE MG_PROFILING_MOD
       CALL MPI_GATHER ( BREAK_DOWN_TIME(OFF_NODE_XZ_NONCONTIG), 1, MPI_REAL8,           &
                         TIME_BREAK_DOWN_OFF_NODE_XZ_NONCONTIG_ALL,        1, MPI_REAL8,           &
                         ROOTPE, MPI_COMM_WORLD, IERR )
+
+      CALL MPI_REDUCE ( first_iter_time, first_iter_time_all, 1, MPI_REAL8,  &
+                        MPI_SUM, ROOTPE, MPI_COMM_WORLD, IERR )
       
       CALL MPI_GATHER ( MG_PERF%TIME_WALL_PE, 1, MPI_REAL8,           &
                         TIME_WALL_ALL,        1, MPI_REAL8,           &
@@ -947,6 +950,8 @@ MODULE MG_PROFILING_MOD
       if(OFF_NODE_XZ_CNT_TOTAL /= 0) then
          OFF_NODE_XZ_NONCONTIG_AVG = OFF_NODE_XZ_NONCONTIG_AVG / OFF_NODE_XZ_CNT_TOTAL
       end if
+
+      first_iter_time_avg = first_iter_time_all / REAL(NUMPES)
 
       ! Root process writes out global data:
       TIME_WALL_MIN = TIME_WALL_ALL( 1 )
@@ -1332,8 +1337,8 @@ MODULE MG_PROFILING_MOD
       OPEN(unit=9, file=output_file, position="append")
       ! WRITE(*,*) TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL
       ! WRITE(*,*) TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL
-      WRITE(9, 500) NX, TIME_WALL_AVG, TIME_STENCIL_AVG, ON_NODE_XY_CONTIG_AVG, OFF_NODE_XY_CONTIG_AVG, ON_NODE_YZ_NONCONTIG_AVG, OFF_NODE_YZ_NONCONTIG_AVG, ON_NODE_XZ_NONCONTIG_AVG, OFF_NODE_XZ_NONCONTIG_AVG
- 500  FORMAT(I0, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3)
+      WRITE(9, 500) NX, first_iter_time_avg, TIME_WALL_AVG, TIME_STENCIL_AVG, ON_NODE_XY_CONTIG_AVG, OFF_NODE_XY_CONTIG_AVG, ON_NODE_YZ_NONCONTIG_AVG, OFF_NODE_YZ_NONCONTIG_AVG, ON_NODE_XZ_NONCONTIG_AVG, OFF_NODE_XZ_NONCONTIG_AVG
+ 500  FORMAT(I0, ' ', F10.3, ' ' ,F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3)
       CLOSE(9)
       
       IF ( REPORT_PERF > 0 ) THEN

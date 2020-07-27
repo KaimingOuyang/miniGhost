@@ -233,4 +233,6 @@ MODULE MG_CONSTANTS_MOD
       
    INTEGER(KIND=MG_INT),  DIMENSION(:,:), ALLOCATABLE ::      &
       MSG_STATUS
+   
+   REAL(KIND=MG_REAL) :: first_iter_time, first_iter_time_all, first_iter_time_avg
 END MODULE MG_CONSTANTS_MOD

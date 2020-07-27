@@ -236,6 +236,8 @@ CONTAINS
       call MARK_ON_NODE_NEIGHBOR()
 
       ! WARM UP
+      CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+      first_iter_time = MG_TIMER()
 #if defined _MG_MPI
       ! CALL MPI_BARRIER(LOCAL_COMM, IERR)
       IF ( STENCIL == STENCIL_2D5PT .OR. STENCIL == STENCIL_3D7PT ) THEN
@@ -264,6 +266,9 @@ CONTAINS
       IN_GRID_ID = OUT_GRID_ID
       OUT_GRID_ID = EXCHG 
 
+      first_iter_time = MG_TIMER() - first_iter_time
+
+      NTSTEPS = NTSTEPS - 1
       CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
       TIME_START_ALL = MG_TIMER()
 
