@@ -249,6 +249,7 @@ MODULE MG_PROFILING_MOD
          OUTPUT_LOC
 
      ! Global values:
+      INTEGER :: DUMMY
 
       INTEGER(KIND=MG_INT8) :: &
          GNUM_ADDS,                                        &
@@ -861,6 +862,26 @@ MODULE MG_PROFILING_MOD
          RETURN
       END IF
 
+      IF (MYPE == 0) THEN
+         CALL get_environment_variable("MINIGHOST_OUT", output_file)
+         OPEN(unit=9, file=output_file, position="append")
+         !WRITE(*,*) "RANK ", MYPE, "SEND to ", MYPE + 1
+         WRITE(9, 500) MYPE, BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG)
+         CLOSE(9)
+         call MPI_SEND(DUMMY, 1, MPI_INTEGER, MYPE + 1, 0, MPI_COMM_MG, IERR)
+      ELSE
+         call MPI_RECV(DUMMY, 1, MPI_INTEGER, MYPE - 1, 0, MPI_COMM_MG, MPI_STATUS_IGNORE, IERR)
+         CALL get_environment_variable("MINIGHOST_OUT", output_file)
+         OPEN(unit=9, file=output_file, position="append")
+         WRITE(9, 500) MYPE, BREAK_DOWN_TIME(OFF_NODE_YZ_NONCONTIG)
+         CLOSE(9)
+         IF (MYPE /= NUMPES - 1) THEN
+            !WRITE(*,*) "RANK ", MYPE, "SEND to ", MYPE + 1
+            call MPI_SEND(DUMMY, 1, MPI_INTEGER, MYPE + 1, 0, MPI_COMM_MG, IERR)
+         END IF
+      END IF
+   
+ 500  FORMAT(I0, ' ', F10.3)
       IF ( MYPE /= ROOTPE ) &
          RETURN
 
@@ -1328,13 +1349,7 @@ MODULE MG_PROFILING_MOD
       CALL DATE_AND_TIME ( TEST_DATE, TEST_TIME )
 
       CLOCK_RES = REAL(MPI_WTICK ( ))
-      CALL get_environment_variable("MINIGHOST_OUT", output_file)
-      OPEN(unit=9, file=output_file, position="append")
-      ! WRITE(*,*) TIME_BREAK_DOWN_OFF_NODE_CONTIG_ALL
-      ! WRITE(*,*) TIME_BREAK_DOWN_OFF_NODE_NONCONTIG_ALL
-      WRITE(9, 500) NX, TIME_WALL_AVG, TIME_STENCIL_AVG, ON_NODE_XY_CONTIG_AVG, OFF_NODE_XY_CONTIG_AVG, ON_NODE_YZ_NONCONTIG_AVG, OFF_NODE_YZ_NONCONTIG_AVG, ON_NODE_XZ_NONCONTIG_AVG, OFF_NODE_XZ_NONCONTIG_AVG
- 500  FORMAT(I0, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3, ' ', F10.3)
-      CLOSE(9)
+      
       
       IF ( REPORT_PERF > 0 ) THEN
 
