@@ -269,30 +269,25 @@ CONTAINS
                TIME_START = MG_TIMER()
                DO IVAR = 1, NVARS
                   
-                  call MG_MPI_STENCIL(GRID(0,0,0,1,IN_GRID_ID), GRID(0,0,0,1,OUT_GRID_ID), IVAR, IERR)
+                  call MG_MPI_STENCIL_CORE(GRID(0,0,0,1,IN_GRID_ID), GRID(0,0,0,1,OUT_GRID_ID), IVAR, IERR)
+                  CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_STENCIL', IVAR )
+               END DO
+               MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
+            END IF
+            
+            TIME_WAIT = MG_TIMER()  
+            CALL MG_MPI_WAITANY_BSPMA()
+            ! CALL MPI_WAITALL ( MAX_NUM_SENDS + MAX_NUM_RECVS, MSG_REQS, MSG_STATUS, IERR )
+
+            MG_PERF%TIME_WAIT_PE = MG_PERF%TIME_WAIT_PE + MG_TIMER() - TIME_WAIT
+            
+            IF ( STENCIL /= STENCIL_NONE ) THEN
+               TIME_START = MG_TIMER()
+               DO IVAR = 1, NVARS
+                  
+                  call MG_MPI_STENCIL_EDGE(GRID(0,0,0,1,IN_GRID_ID), GRID(0,0,0,1,OUT_GRID_ID), IVAR, IERR)
                   ! CALL MG_STENCIL ( GRID(0,0,0,IVAR), IVAR, IERR )
                   CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_STENCIL', IVAR )
-                  
-
-                  ! Reduction across GRID option
-                  ! IF ( GRIDS_TO_SUM(IVAR) ) THEN
-                  !    TIME_START_2 = MG_TIMER ()
-                  !    CALL MG_SUM_GRID ( GRID(0,0,0,IVAR,OUT_GRID_ID), IVAR, GSUM, IERR )
-                  !    CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA:MG_SUM_GRID', IVAR )
-                  !    MG_PERF%TIME_SUMGRID_PE = MG_PERF%TIME_SUMGRID_PE + MG_TIMER () - TIME_START_2
-
-                  !    IF ( MYPE == ROOTPE ) THEN
-                  !       ERROR_ITER = ABS ( SOURCE_TOTAL(IVAR) - GSUM ) / SOURCE_TOTAL(IVAR)
-                  !       IF ( ERROR_ITER > ERROR_TOL ) THEN
-                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                  !          IERR = -1
-                  !          CALL MG_ASSERT ( IERR, 'DRIVER_BSPMA', IVAR )
-                  !       END IF
-                  !       IF ( MOD ( TSTEP, REPORT_DIFFUSION ) == 0 ) THEN
-                  !          WRITE(*,99) TSTEP, ISPIKE, IVAR, ERROR_ITER, ERROR_TOL
-                  !       END IF
-                  !    END IF
-                  ! END IF
                END DO
                MG_PERF%TIME_STENCIL_PE = MG_PERF%TIME_STENCIL_PE + MG_TIMER() - TIME_START
             END IF

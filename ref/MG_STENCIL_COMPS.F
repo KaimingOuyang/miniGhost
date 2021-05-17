@@ -168,7 +168,7 @@ CONTAINS
    END SUBROUTINE MG_STENCIL_2D9PT
    
 !  ======================================================================================
-   SUBROUTINE MG_MPI_STENCIL_3D7PT(IN_GRID, OUT_GRID, IERR)
+   SUBROUTINE MG_MPI_STENCIL_3D7PT_CORE(IN_GRID, OUT_GRID, IERR)
       ! ---------------------
       ! Argument Declarations
       ! ---------------------
@@ -193,9 +193,9 @@ CONTAINS
    
       IERR = 0
 
-      DO K = 1, NZ 
-         DO J = 1, NY
-            DO I = 1, NX
+      DO K = 2, NZ-1 
+         DO J = 2, NY-1
+            DO I = 2, NX-1
                OUT_GRID(I,J,K) =            ( IN_GRID(I,J,K-1) +                    &
                                              IN_GRID(I-1,J,K) +                 &
                              IN_GRID(I,J-1,K) + IN_GRID(I  ,J,K) + IN_GRID(I,J+1,K)   &
@@ -205,7 +205,73 @@ CONTAINS
             END DO
          END DO
       END DO
-   END SUBROUTINE MG_MPI_STENCIL_3D7PT
+   END SUBROUTINE MG_MPI_STENCIL_3D7PT_CORE
+
+   SUBROUTINE MG_MPI_STENCIL_3D7PT_EDGE(IN_GRID, OUT_GRID, IERR)
+      ! ---------------------
+      ! Argument Declarations
+      ! ---------------------
+
+      INTEGER, INTENT(OUT) :: &
+         IERR           ! Return status
+
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1), INTENT(INOUT) :: &
+         IN_GRID
+      REAL(KIND=MG_REAL), DIMENSION(0:NX+1, 0:NY+1, 0:NZ+1), INTENT(INOUT) :: &
+         OUT_GRID
+      ! ------------------
+      ! Local Declarations
+      ! ------------------
+
+      INTEGER :: &
+         I, J, K
+
+      ! ---------------------
+      ! Executable Statements
+      ! ---------------------
+   
+      IERR = 0
+
+      ! compute Z dimension
+      DO K = 1, NZ, NZ - 1
+         DO J = 1, NY
+            DO I = 1, NX
+               OUT_GRID(I,J,K) =            ( IN_GRID(I,J,K-1) +                    &
+                                             IN_GRID(I-1,J,K) +                 &
+                             IN_GRID(I,J-1,K) + IN_GRID(I  ,J,K) + IN_GRID(I,J+1,K)   &
+                                           + IN_GRID(I+1,J,K)                   &
+                                             + IN_GRID(I,J,K+1) ) / SEVEN
+            END DO
+         END DO
+      END DO
+
+      ! compute Y dimension
+      DO J = 1, NY, NY - 1
+         DO K = 1, NZ
+            DO I = 1, NX
+               OUT_GRID(I,J,K) =            ( IN_GRID(I,J,K-1) +                    &
+                                             IN_GRID(I-1,J,K) +                 &
+                             IN_GRID(I,J-1,K) + IN_GRID(I  ,J,K) + IN_GRID(I,J+1,K)   &
+                                           + IN_GRID(I+1,J,K)                   &
+                                             + IN_GRID(I,J,K+1) ) / SEVEN
+            END DO
+         END DO
+      END DO
+
+
+      ! compute Y dimension
+      DO I = 1, NX, NX - 1
+         DO J = 1, NY
+            DO K = 1, NZ
+               OUT_GRID(I,J,K) =            ( IN_GRID(I,J,K-1) +                    &
+                                             IN_GRID(I-1,J,K) +                 &
+                             IN_GRID(I,J-1,K) + IN_GRID(I  ,J,K) + IN_GRID(I,J+1,K)   &
+                                           + IN_GRID(I+1,J,K)                   &
+                                             + IN_GRID(I,J,K+1) ) / SEVEN
+            END DO
+         END DO
+      END DO
+   END SUBROUTINE MG_MPI_STENCIL_3D7PT_EDGE
 
    SUBROUTINE MG_STENCIL_3D7PT ( GRID, IERR )
    
